@@ -1,0 +1,6 @@
+name = Textbook Companion
+description = Textbook Companion project, IIT Bombay
+package = Oscad
+version = VERSION
+core = 6.x
+dependencies[] = ahah_helper
