@@ -511,7 +511,7 @@ function proposal_edit_form($form_state)
   $form['how_project'] = array(
     '#type' => 'select',
     '#title' => t('How did you come to know about this project'),
-    '#options' => array('Oscad Website' => 'Oscad Website',
+    '#options' => array('CFD Website' => 'CFD Website',
                         'Friend' => 'Friend',
                         'Professor/Teacher' => 'Professor/Teacher',
                         'Mailing List' => 'Mailing List',
