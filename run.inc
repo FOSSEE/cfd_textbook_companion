@@ -59,7 +59,7 @@ function textbook_companion_run_form($form, &$form_state)
         );
         $form['download_book'] = array(
             '#type' => 'item',
-            '#markup' => '<div id="ajax-download-book-replace">' . l('Download', 'textbook-companion/download/book/' . $book_default_value) . ' ' . t('(Download the DWSIM codes for all the solved examples)') . '</div>'
+            '#markup' => '<div id="ajax-download-book-replace">' . l('Download', 'textbook-companion/download/book/' . $book_default_value) . ' ' . t('(Download the OpenFOAM codes for all the solved examples)') . '</div>'
         );
         /*$book_pref_id_array = array("19");
         if(in_array($book_default_value, $book_pref_id_array)){
@@ -256,7 +256,7 @@ function ajax_chapter_list_callback($form, $form_state)
       {
         $commands[] = ajax_command_html("#ajax-book-details-replace", _html_book_info($book_list_default_value));
         $form['chapter']['#options'] = _list_of_chapters($book_list_default_value);
-        $commands[] = ajax_command_html("#ajax-download-book-replace", l('Download', 'textbook-companion/download/book/' . $book_list_default_value) . ' ' . t('(Download the DWSIM codes for all the solved examples)'));
+        $commands[] = ajax_command_html("#ajax-download-book-replace", l('Download', 'textbook-companion/download/book/' . $book_list_default_value) . ' ' . t('(Download the OpenFOAM codes for all the solved examples)'));
         $book_pref_id_array = array(
             "19"
         );
@@ -299,7 +299,7 @@ function ajax_example_list_callback($form, $form_state)
       {
         $form['examples']['#options'] = _list_of_examples($chapter_list_default_value);
         $commands[] = ajax_command_replace("#ajax-example-list-replace", drupal_render($form['examples']));
-        $commands[] = ajax_command_html("#ajax-download-chapter-replace", l('Download', 'textbook-companion/download/chapter/' . $chapter_list_default_value) . ' ' . t('(Download the DWSIM codes for all the solved examples from the Chapter)'));
+        $commands[] = ajax_command_html("#ajax-download-chapter-replace", l('Download', 'textbook-companion/download/chapter/' . $chapter_list_default_value) . ' ' . t('(Download the OpenFOAM codes for all the solved examples from the Chapter)'));
         $commands[] = ajax_command_html("#ajax-download-example-code-replace", '');
         $commands[] = ajax_command_html("#ajax-download-example-files-replace", '');
       }
@@ -364,7 +364,7 @@ function ajax_example_files_callback($form, $form_state)
                 'rows' => $example_files_rows
             ));
           }
-        $commands[] = ajax_command_html("#ajax-download-example-code-replace", l('Download DWSIM code for the example', 'textbook-companion/download/example/' . $example_list_default_value));
+        $commands[] = ajax_command_html("#ajax-download-example-code-replace", l('Download OpenFOAM code for the example', 'textbook-companion/download/example/' . $example_list_default_value));
         $commands[] = ajax_command_html("#ajax-download-example-files-replace", $example_files);
       }
     else

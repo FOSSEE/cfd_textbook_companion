@@ -999,7 +999,7 @@ FOSSEE,IIT Bombay', array(
 
 Dear !user_name,
 
-Your example for DWSIM Textbook Companion with the following details is approved.
+Your example for OpenFOAM Textbook Companion with the following details is approved.
 
 Title of the book : ' . $pref_data->book . '
 Title of the chapter : ' . $chap_data->name . '
@@ -1053,7 +1053,7 @@ FOSSEE,IIT Bombay', array(
 
 Dear !user_name,
 
-Your uploaded example for DWSIM Textbook Companion with the following details has been marked as pending to be reviewed.
+Your uploaded example for OpenFOAM Textbook Companion with the following details has been marked as pending to be reviewed.
 
 Title of the book : ' . $pref_data->book . '
 Title of the chapter : ' . $chap_data->name . '
@@ -1115,7 +1115,7 @@ FOSSEE,IIT Bombay', array(
 
 Dear !user_name,
 
-Your example for DWSIM Textbook Companion has been marked as dis-approved and deleted.
+Your example for OpenFOAM Textbook Companion has been marked as dis-approved and deleted.
 
 Title of the book : ' . $pref_data->book . '
 Title of the chapter : ' . $chap_data->name . '
