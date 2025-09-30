@@ -1,0 +1,60 @@
+textbook_companion._proposal_pending:
+  route_name: textbook_companion._proposal_pending
+  title: 'Manage Book Proposals'
+  description: 'Manage Book Proposals'
+textbook_companion.code_approval:
+  route_name: textbook_companion.code_approval
+  title: 'Manage Code Approval'
+  description: 'Manage Code Approval'
+textbook_companion.list_chapters:
+  route_name: textbook_companion.list_chapters
+  title: 'Code Submission'
+  description: 'Code Submission'
+textbook_companion.search_form:
+  route_name: textbook_companion.search_form
+  title: 'Book Search'
+  description: ''
+textbook_companion.run_form:
+  route_name: textbook_companion.run_form
+  title: 'Download Codes'
+# textbook_companion.run_form_0:
+#   route_name: textbook_companion.run_form
+#   title: 'Download Codes'
+textbook_companion.settings_form:
+  route_name: textbook_companion.settings_form
+  title: 'Book Companion Settings'
+  description: 'Textbook Companion Settings'
+textbook_companion._data_entry_proposal_all:
+  route_name: textbook_companion._data_entry_proposal_all
+  title: 'Approved books list'
+textbook_companion.dataentry_edit:
+  route_name: textbook_companion.dataentry_edit
+  title: 'Edit book details'
+textbook_companion.cheque_proposal_all:
+  route_name: textbook_companion.cheque_proposal_all
+  title: 'Cheque Proposals'
+  description: 'Cheque Proposals'
+textbook_companion.contact_details:
+  route_name: textbook_companion.contact_details
+  title: 'Update Contact Details'
+  description: 'Update Contact Details'
+textbook_companion.cheque_contct_form:
+  route_name: textbook_companion.cheque_contct_form
+  title: Report
+  description: 'Cheque Contact Form'
+textbook_companion.cheque_status_form:
+  route_name: textbook_companion.cheque_status_form
+  title: 'Cheque Status'
+  description: 'Cheque Status'
+textbook_companion.cheque_report_form:
+  route_name: textbook_companion.cheque_report_form
+  title: Report
+  description: Report
+  parent: textbook_companion.cheque_contct_form
+textbook_companion._list_all_certificates:
+  route_name: textbook_companion._list_all_certificates
+  title: 'List of all Certificates'
+  description: 'List of all Certificates'
+textbook_companion.completed_books:
+  route_name: textbook_companion.completed_books
+  title: 'Completed Books'

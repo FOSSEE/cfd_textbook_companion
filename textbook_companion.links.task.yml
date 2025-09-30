@@ -1,0 +1,60 @@
+textbook_companion._proposal_pending:
+  route_name: textbook_companion._proposal_pending
+  title: 'Pending Proposals'
+  weight: 1
+  base_route: textbook_companion._proposal_pending
+textbook_companion._proposal_all:
+  route_name: textbook_companion._proposal_all
+  title: 'All Proposals'
+  weight: 2
+  base_route: textbook_companion._proposal_pending
+textbook_companion._failed_all:
+  route_name: textbook_companion._failed_all
+  title: 'Failed Proposals'
+  weight: 3
+  base_route: textbook_companion._proposal_pending
+textbook_companion.code_approval:
+  route_name: textbook_companion.code_approval
+  title: 'Code Approval'
+  weight: 1
+  base_route: textbook_companion.code_approval
+textbook_companion.bulk_approval_form:
+  route_name: textbook_companion.bulk_approval_form
+  title: 'Bulk Manage'
+  weight: 2
+  base_route: textbook_companion.code_approval
+textbook_companion.list_chapters:
+  route_name: textbook_companion.list_chapters
+  title: 'List Chapters'
+  weight: 1
+  base_route: textbook_companion.list_chapters
+textbook_companion.upload_examples:
+  route_name: textbook_companion.upload_examples
+  title: 'Code Submission'
+  weight: 2
+  base_route: textbook_companion.code_approval
+textbook_companion.search_form:
+  route_name: textbook_companion.search_form
+  title: 'Book Search'
+  weight: 1
+  base_route: textbook_companion.search_form
+textbook_companion.browse_book:
+  route_name: textbook_companion.browse_book
+  title: 'By Book Title'
+  weight: 2
+  base_route: textbook_companion.search_form
+textbook_companion.browse_author:
+  route_name: textbook_companion.browse_author
+  title: 'By Author'
+  weight: 3
+  base_route: textbook_companion.search_form
+textbook_companion.browse_college_form:
+  route_name: textbook_companion.browse_college_form
+  title: 'By College'
+  weight: 4
+  base_route: textbook_companion.search_form
+textbook_companion.browse_student:
+  route_name: textbook_companion.browse_student
+  title: 'By Student'
+  weight: 5
+  base_route: textbook_companion.search_form
