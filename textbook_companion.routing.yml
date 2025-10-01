@@ -202,7 +202,7 @@ textbook_companion.download_example:
   requirements:
     _permission: 'download code'
 textbook_companion.download_chapter:
-  path: /textbook-companion/download/chapter/
+  path: /textbook-companion/download/chapter/{chapter_id}
   defaults:
     _title: 'Code Download'
     _controller: '\Drupal\textbook_companion\Controller\DefaultController::textbook_companion_download_chapter'

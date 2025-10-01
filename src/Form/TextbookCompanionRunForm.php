@@ -32,7 +32,7 @@ class TextbookCompanionRunForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-	    $options_first =$this->_list_of_books($book_default_value);
+	    // $options_first =$this->_list_of_books($book_default_value);
     // $options_two = $this->_ajax_get_experiment_list();
     // Get the book preference ID from route parameter
 $url_book_pref_id = \Drupal::request()->attributes->get('book_pref_id') ?? 0;
@@ -67,27 +67,28 @@ $$category_default_value = $result ? $result->category : 0; // fetched from text
 $form['book'] = [
   '#type' => 'select',
   '#title' => $this->t('Title of the book'),
-  '#options' => $this->_list_of_books($category_default_value), // pass category, not book
+  '#options' => $this->_list_of_books($category_default_value),
   '#default_value' => $url_book_pref_id,
-  '#prefix' => '<div id="ajax-book-list-replace">',
-  '#suffix' => '</div>',
   '#ajax' => [
     'callback' => '::ajax_book_list_callback',
-    'wrapper' => 'ajax_selected_book',
+    'wrapper' => 'ajax-book-details', // ✅ FIXED
   ],
 ];
 
 $form['book_details_wrapper'] = [
   '#type' => 'container',
-  '#attributes' => ['id' => 'ajax-book-details'],
-  // '#markup' => $book_info,
+  '#attributes' => ['id' => 'ajax-book-details'], // ✅ MUST MATCH
 ];
 
+$form['book_details_wrapper']['book_details'] = [
+  '#type' => 'item',
+  '#markup' => $book_info,
+];
 
-    $form['download_book_wrapper']['book_details'] = [
-      '#type' => 'item',
-      '#markup' => '<div id="ajax-book-details-replace">' . $book_info . '</div>',
-    ];
+    // $form['download_book_wrapper']['book_details'] = [
+    //   '#type' => 'item',
+    //   '#markup' => '<div id="ajax-book-details-replace">' . $book_info . '</div>',
+    // ];
 	 $form['download_book'] = [
   '#type' => 'item',
   '#markup' => Link::fromTextAndUrl(
@@ -147,17 +148,22 @@ $form['download_chapter_wrapper'] = [
 ];
 // ----------------Exapmle-------------------------------
     $example_default_value = $form_state->getValue('chapter') ?? '';
+    // $chapter_id = $form_state->getValue('chapter') ?? $chapter_default_value ?? 0;
+$form['examples']['#options'] = $this->_list_of_examples($chapter_id);
 
+
+  $form['example_wrapper'] = [
+  '#type' => 'container',
+  '#attributes' => ['id' => 'ajax-example-wrapper'],
+];
     $form['examples'] = [
         '#type' => 'select',
         '#title' => $this->t('Example No. (Caption):'),
         '#options' => $this->_list_of_examples($example_default_value),
         '#default_value' => $form_state->getValue('examples') ?? '',
-        '#prefix' => '<div id="ajax-example-list-replace">',
-        '#suffix' => '</div>',
         '#ajax' => [
-            'callback' => '::ajaxExampleFilesCallback',
-            'wrapper' => 'ajax-download-example-files-replace',
+            'callback' => '::ajax_example_list_callback',
+            'wrapper' => 'ajax-selected_list',
         ],
         '#states' => [
             'invisible' => [
@@ -166,21 +172,23 @@ $form['download_chapter_wrapper'] = [
         ],
     ];
 
-    $form['download_example_code'] = [
+    $form['download_example_wrapper'] = [
         '#type' => 'item',
         '#markup' => '<div id="ajax-download-example-code-replace"></div>',
     ];
-$form['download_example_code']['download_example'] = [
+$form['download_example_wrapper']['download_example'] = [
   '#type' => 'item',
   '#markup' => Link::fromTextAndUrl(
     $this->t('Download Example'),
-    Url::fromRoute('textbook_companion.download_example', ['chapter_id' => $book_default_value])
-  )->toString() . ' ' . $this->t('(Download the OpenFOAM codes for all the solved examples)'),
+    Url::fromRoute('textbook_companion.download_example', ['chapter_id' => $chapter_id])
+) ->toString() . $this->t('(Download the OpenFOAM codes for all the solved examples)'),
+// Url::fromRoute('textbook_companion.download_example', ['chapter_id' => $chapter_id])
+
 ];
-    $form['example_files'] = [
-        '#type' => 'item',
-        '#markup' => '<div id="ajax-download-example-files-replace"></div>',
-    ];
+    // $form['example_files'] = [
+    //     '#type' => 'item',
+    //     '#markup' => '<div id="ajax-download-example-files-replace"></div>',
+    // ];
 
 
 
@@ -214,9 +222,18 @@ $form['download_example_code']['download_example'] = [
 /**
  * Get list of books for a category.
  */
+// public function ajax_book_list_callback(array &$form, FormStateInterface $form_state) {
+//   return $form['download_book_wrapper'];
+// }
 public function ajax_book_list_callback(array &$form, FormStateInterface $form_state) {
-  return $form['download_book_wrapper'];
+    $selected_book = $form_state->getValue('book');
+    $book_info = $selected_book ? $this->_html_book_info($selected_book) : '';
+
+    // Update only the book details part
+    $form['book_details_wrapper']['book_details']['#markup'] = $book_info;
+    return $form['book_details_wrapper'];
 }
+
 public function ajax_book_details_callback(array &$form, FormStateInterface $form_state) {
   // Get the selected book from form state
   $selected_book = $form_state->getValue('book');
@@ -226,7 +243,7 @@ public function ajax_book_details_callback(array &$form, FormStateInterface $for
   
   return $form['book_details_wrapper'];
 }
-public function ajax_chapter_list_callback(array &$form, FormStateInterface $form_state) {
+public function ajax_example_list_callback(array &$form, FormStateInterface $form_state) {
   return $form['chapter_wrapper'];
 }
 
