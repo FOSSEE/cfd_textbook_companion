@@ -19,6 +19,27 @@ class TextbookCompanionRunForm extends FormBase {
   }
 
   /**
+   * Helper function to generate the Chapter Download Link markup.
+   *
+   * @param int $chapter_id
+   * The ID of the currently selected chapter.
+   * @return string
+   * The HTML markup for the download link.
+   */
+  private function getChapterDownloadLinkMarkup($chapter_id) {
+    if (!$chapter_id) {
+        return '';
+    }
+
+    $link = Link::fromTextAndUrl(
+        $this->t('Download Chapter'),
+        Url::fromRoute('textbook_companion.download_chapter', ['chapter_id' => $chapter_id])
+    )->toString();
+
+    return $link;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
@@ -74,15 +95,15 @@ class TextbookCompanionRunForm extends FormBase {
       '#states' => [ 'invisible' => [':input[name="book"]' => ['value' => 0]]],
     ];
 
-    // ---------------------------
-    // Chapter select and its download link
-    // ---------------------------
-    $selected_chapter = $form_state->getValue('chapter') ?? 0;
+    // // ---------------------------
+    // // Chapter select and its download link
+    // // ---------------------------
+    $chapter_id = $form_state->getValue('chapter') ?? 0;
     $form['book_dependents_wrapper']['chapter'] = [
       '#type' => 'select',
       '#title' => $this->t('Title of the chapter'),
       '#options' => $this->_list_of_chapters($selected_book),
-      '#default_value' => $selected_chapter,
+      '#default_value' => $chapter_id,
       '#ajax' => [
         'callback' => '::ajax_chapter_changed_callback',
         'wrapper' => 'example-wrapper', // Target the wrapper for the examples.
@@ -90,19 +111,34 @@ class TextbookCompanionRunForm extends FormBase {
       '#states' => [ 'invisible' => [':input[name="book"]' => ['value' => 0]]],
     ];
 
-    // ✅ MOVED: The chapter download link is now here, right after its dropdown.
-    $form['book_dependents_wrapper']['chapter_download'] = [
-      '#type' => 'item',
-      '#markup' => Link::fromTextAndUrl(
-        $this->t('Download Chapter'),
-        Url::fromRoute('textbook_companion.download_chapter', ['chapter_id' => $selected_chapter])
-      )->toString(),
-      '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
+    // ✅ FIX: The chapter download link is now wrapped in its own specific container
+    // so we can update it precisely in the AJAX callback.
+    $form['book_dependents_wrapper']['chapter_download_wrapper'] = [
+        '#type' => 'container',
+        '#attributes' => ['id' => 'chapter-download-link-wrapper'],
+        // The link element is now inside the wrapper
+        'chapter_download_item' => [
+            '#type' => 'item',
+            '#markup' => $this->getChapterDownloadLinkMarkup($chapter_id),
+            '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
+        ],
+        // The states array needs to be on the container now if you want to hide the whole thing
+        '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
     ];
 
 
     // ---------------------------
     // Example select and its download link
+
+    // ... (code before example selection)
+
+    $selected_example = $form_state->getValue('examples') ?? 0;
+
+    // ---------------------------
+    // Example Details Wrapper (Link + File Table)
+    // ---------------------------
+    // This wrapper is the target for the example changed AJAX callback.
+   
     // ---------------------------
     // This wrapper contains everything that depends on the selected chapter.
     $form['example_wrapper'] = [
@@ -113,7 +149,7 @@ class TextbookCompanionRunForm extends FormBase {
     $form['example_wrapper']['examples'] = [
       '#type' => 'select',
       '#title' => $this->t('Example No. (Caption):'),
-      '#options' => $this->_list_of_examples($selected_chapter),
+      '#options' => $this->_list_of_examples($chapter_id),
       '#ajax' => [
         'callback' => '::ajax_example_changed_callback',
         // ✅ UPDATED: Point to the new, more specific wrapper for the example link.
@@ -132,14 +168,67 @@ class TextbookCompanionRunForm extends FormBase {
     $form['example_wrapper']['download_example_link_wrapper']['example_download'] = [
         '#type' => 'item',
         '#markup' => Link::fromTextAndUrl(
-            $this->t('Download Example Code'),
+            $this->t('Download OpenFOAM code for the example' ),
             Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
         )->toString(),
         '#states' => ['invisible' => [':input[name="examples"]' => ['value' => 0]]],
     ];
+
+
+    // //  code for download the file and display the filename and type
+    //     $connection = \Drupal::database();
+    // // Assuming the table name is 'textbook_companion_example_file'
+    // $query = $connection->select('textbook_companion_example_files', 'tcef');
+    // $query->fields('tcef', ['id', 'filename', 'filetype']);
+    // $query->condition('example_id', $example_id);
+    // $query->orderBy('filename', 'ASC');
+    // $results = $query->execute()->fetchAll();
+
+    // if (empty($results)) {
+    //     return ['#markup' => ''];
+    // }
+
+    // $header = [
+    //     'filename' => $this->t('Filename'),
+    //     'filetype' => $this->t('Type'),
+    // ];
+
+    // var_Dump($header);die;
+    // $rows = [];
+    // foreach ($results as $file) {
+    //     $example_file_type = $this->t('Unknown');
+    //     switch ($file->filetype) {
+    //         case 'S':
+    //             $example_file_type = $this->t('Source or Main file');
+    //             break;
+    //         case 'R':
+    //             $example_file_type = $this->t('Result file');
+    //             break;
+    //         case 'X':
+    //             $example_file_type = $this->t('xcos file');
+    //             break;
+    //     }
+
+    //     // Create the linked filename. Adjust the route name if necessary.
+    //     $link = Link::fromTextAndUrl(
+    //         $file->filename,
+    //         Url::fromRoute('textbook_companion.download_file', ['file_id' => $file->id])
+    //     )->toString();
+        
+    //     $rows[] = [
+    //         // Ensure rows are simple arrays or use the 'data' structure
+    //         // as necessary for your specific Drupal theme.
+    //         // Using a simple array for row data is often sufficient.
+    //         ['#markup' => $link],
+    //         ['#markup' => $example_file_type],
+    //     ];
+    // }
+
     
-    return $form;
+
+ return $form;
   }
+
   // ---------------------------
   // AJAX CALLBACKS
   // ---------------------------
@@ -151,10 +240,29 @@ class TextbookCompanionRunForm extends FormBase {
   }
 
   public function ajax_chapter_changed_callback(array &$form, FormStateInterface $form_state) {
-    // Return the wrapper containing the examples dropdown and related links.
-    return $form['example_wrapper'];
-  }
+    $response = new AjaxResponse();
+    $chapter_id = $form_state->getValue('chapter') ?? 0;
+    
+    // 1. Update the examples select field and its dependent link wrapper.
+    // This is the original part that returns the 'example-wrapper'.
+    $response->addCommand(new HtmlCommand('#example-wrapper', $form['example_wrapper']));
 
+    // 2. ✅ FIX: Dynamically build the new chapter download link and update the item's markup.
+    $link_markup = $this->getChapterDownloadLinkMarkup($chapter_id);
+    
+    // We update the specific item inside the wrapper.
+    $response->addCommand(new HtmlCommand(
+        '#chapter-download-link-wrapper', 
+        $form['book_dependents_wrapper']['chapter_download_wrapper']['chapter_download_item']['#markup'] = $link_markup
+    ));
+    
+    
+    return $response;
+  }
+// public function ajax_example_changed_callback(array &$form, FormStateInterface $form_state) {
+//     // Return the wrapper containing both the example download link and the files table.
+//     return $form['example_details_wrapper'];
+//   }
   
   public function ajax_example_changed_callback(array &$form, FormStateInterface $form_state) {
     // ✅ UPDATED: Return the new wrapper containing just the example download link.
@@ -187,6 +295,69 @@ class TextbookCompanionRunForm extends FormBase {
     return $book_titles;
   }
 
+  
+  public function ajax_example_files_callback($example_id) {
+    if (!$example_id) {
+        return ['#markup' => ''];
+    }
+
+    $connection = \Drupal::database();
+    // Assuming the table name is 'textbook_companion_example_file'
+    $query = $connection->select('textbook_companion_example_file', 'tcef');
+    $query->fields('tcef', ['id', 'filename', 'filetype']);
+    $query->condition('example_id', $example_id);
+    $query->orderBy('filename', 'ASC');
+    $results = $query->execute()->fetchAll();
+
+    if (empty($results)) {
+        return ['#markup' => ''];
+    }
+
+    $header = [
+        'filename' => $this->t('Filename'),
+        'filetype' => $this->t('Type'),
+    ];
+
+    $rows = [];
+    foreach ($results as $file) {
+        $example_file_type = $this->t('Unknown');
+        switch ($file->filetype) {
+            case 'S':
+                $example_file_type = $this->t('Source or Main file');
+                break;
+            case 'R':
+                $example_file_type = $this->t('Result file');
+                break;
+            case 'X':
+                $example_file_type = $this->t('xcos file');
+                break;
+        }
+
+        // Create the linked filename. Adjust the route name if necessary.
+        $link = Link::fromTextAndUrl(
+            $file->filename,
+            Url::fromRoute('textbook_companion.download_file', ['file_id' => $file->id])
+        )->toString();
+        
+        $rows[] = [
+            // Ensure rows are simple arrays or use the 'data' structure
+            // as necessary for your specific Drupal theme.
+            // Using a simple array for row data is often sufficient.
+            ['#markup' => $link],
+            ['#markup' => $example_file_type],
+        ];
+    }
+
+    return [
+        '#type' => 'table',
+        // ✅ REMOVED: Remove the '#caption' element to match the image.
+        '#header' => $header,
+        '#rows' => $rows,
+        // ✅ UPDATED: Add a custom class for styling the table header.
+        '#attributes' => ['class' => ['textbook-companion-files', 'textbook-companion-example-file-list']],
+        '#empty' => $this->t('No files found for this example.'),
+    ];
+  }
   public function _html_book_info($preference_id) {
     $connection = \Drupal::database();
 
@@ -275,6 +446,8 @@ class TextbookCompanionRunForm extends FormBase {
 
     return $options;
   }
+
+  
     public function submitForm(array &$form, FormStateInterface $form_state) {
     }
 }
