@@ -174,14 +174,14 @@ textbook_companion.completed_books:
   requirements:
     _permission: 'textbook companion  download code'
 textbook_companion.run_form:
-  path: /textbook-companion/textbook-run/{book_pref_id}
+  path: /textbook-companion/textbook-run/{book_pref_id?}
   defaults:
     _title: 'Download Codes'
     _form: \Drupal\textbook_companion\Form\TextbookCompanionRunForm
   requirements:
     _permission: 'access content'
 textbook_companion.download_example_file:
-  path: /textbook-companion/download/file
+  path: /textbook-companion/download/file/{example_file_id}
   defaults:
     _title: 'Code Download'
     _controller: '\Drupal\textbook_companion\Controller\DefaultController::textbook_companion_download_example_file'
@@ -195,7 +195,7 @@ textbook_companion.download_sample_code:
   requirements:
     _permission: 'download code'
 textbook_companion.download_example:
-  path: /textbook-companion/download/example
+  path: /textbook-companion/download/example/{example_id}
   defaults:
     _title: 'Code Download'
     _controller: '\Drupal\textbook_companion\Controller\DefaultController::textbook_companion_download_example'

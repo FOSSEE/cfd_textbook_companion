@@ -21,6 +21,10 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\RendererInterface;
 use ZipArchieve;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 
 /**
@@ -1012,40 +1016,108 @@ class DefaultController extends ControllerBase {
     return $return_html;
   }
 
-    public function textbook_companion_download_example_file($example_file_id) {
-    $root_path = \Drupal::service("textbook_companion_global")->textbook_companion_path();
+  //   public function textbook_companion_download_example_file($example_file_id) {
+  //   $root_path = \Drupal::service("textbook_companion_global")->textbook_companion_path();
 
-    // Fetch file details
-    $file_data = $this->database->query("
-      SELECT * FROM textbook_companion_preference tcp 
-      JOIN textbook_companion_chapter tcc ON tcp.id = tcc.preference_id 
-      JOIN textbook_companion_example tce ON tcc.id = tce.chapter_id 
-      JOIN textbook_companion_example_files tcef ON tce.id = tcef.example_id 
-      WHERE tcef.id = :file_id LIMIT 1
-    ", [':file_id' => $example_file_id])->fetchObject();
+  //   // var_dump($root_path);die;
+  //   // Fetch file details
+  //   $file_data = $this->database->query("
+  //     SELECT * FROM textbook_companion_preference tcp 
+  //     JOIN textbook_companion_chapter tcc ON tcp.id = tcc.preference_id 
+  //     JOIN textbook_companion_example tce ON tcc.id = tce.chapter_id 
+  //     JOIN textbook_companion_example_files tcef ON tce.id = tcef.example_id 
+  //     WHERE tcef.id = :file_id ", 
+  //   [':file_id' => $example_file_id])->fetchObject();
 
-    if (!$file_data) {
-      $this->messenger()->addError($this->t('File not found.'));
-      return $this->redirect('/textbook-companion/textbook-run');
-    }
 
-    $file_path = $root_path . $file_data->directory_name . '/' . $file_data->filepath;
+  //   // var_dump($file_data);die;
+  //   if (!$file_data) {
+  //     $this->messenger()->addError($this->t('File not found.'));
+  //     return $this->redirect('/textbook-companion/textbook-run');
+  //   }
 
-    if (!file_exists($file_path)) {
-      $this->messenger()->addError($this->t('File missing on server.'));
-      return $this->redirect('/textbook-companion/textbook-run');
-    }
+  //   $file_path = $root_path . $file_data->directory_name . '/' . $file_data->filepath;
 
-    // Serve file as response
-    $response = new Response(file_get_contents($file_path));
-    $response->headers->set('Content-Type', $file_data->filemime);
-    $response->headers->set('Content-Disposition', 'attachment; filename="' . $file_data->filename . '"');
-    $response->headers->set('Content-Length', filesize($file_path));
+  //   if (!file_exists($file_path)) {
+  //     $this->messenger()->addError($this->t('File missing on server.'));
+  //     return $this->redirect('/textbook-companion/textbook-run');
+  //   }
 
-    return $response;
+  //   // Serve file as response
+  //   $response = new Response(file_get_contents($file_path));
+  //   $response->headers->set('Content-Type', $file_data->filemime);
+  //   $response->headers->set('Content-Disposition', 'attachment; filename="' . $file_data->filename . '"');
+  //   $response->headers->set('Content-Length', filesize($file_path));
+
+  //   return $response;
+  // }
+
+
+
+public function textbook_companion_download_example_file($example_file_id) {
+  // Get the example file ID from the route.
+  $example_file_id = \Drupal::routeMatch()->getParameter('example_file_id');
+  
+  if (empty($example_file_id)) {
+    throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException();
   }
 
+  // Get root path (assuming this function exists in your module).
+  $root_path =\Drupal::service("textbook_companion_global")->textbook_companion_path();
 
+  // Database query using Drupal 10 Database API.
+  // $connection = \Drupal::database();
+  // $query = $connection->select('textbook_companion_preference', 'tcp')
+  //   ->join('textbook_companion_chapter', 'tcc', 'tcp.id = tcc.preference_id')
+  //   ->join('textbook_companion_example', 'tce', 'tcc.id = tce.chapter_id')
+  //   ->join('textbook_companion_example_files', 'tcef', 'tce.id = tcef.example_id')
+  //       ->fields('tcef')
+
+  //   ->condition('tcef.id', $example_file_id)
+  //   ->range(0, 1);
+
+  $connection = \Drupal::database();
+
+$query = $connection->select('textbook_companion_preference', 'tcp');
+$query->join('textbook_companion_chapter', 'tcc', 'tcp.id = tcc.preference_id');
+$query->join('textbook_companion_example', 'tce', 'tcc.id = tce.chapter_id');
+$query->join('textbook_companion_example_files', 'tcef', 'tce.id = tcef.example_id');
+
+// Fetch both file info and directory name
+$query->fields('tcef');
+$query->addField('tcp', 'directory_name', 'directory_name');
+
+$query->condition('tcef.id', $example_file_id);
+$query->range(0, 1);
+
+
+// Execute.
+
+  $example_file_data = $query->execute()->fetchObject();
+
+  if (!$example_file_data) {
+    throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException();
+  }
+
+  // Build full file path.
+  $file_path = $root_path . $example_file_data->directory_name . '/' . $example_file_data->filepath;
+
+  // var_dump( $example_file_data->directory_name);die;
+  if (!file_exists($file_path)) {
+    throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('File not found.');
+  }
+
+  // Prepare response using Symfony's BinaryFileResponse.
+  $response = new BinaryFileResponse($file_path);
+  $response->setContentDisposition(
+    ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+    $example_file_data->filename
+  );
+  $response->headers->set('Content-Type', $example_file_data->filemime);
+  $response->headers->set('Content-Length', filesize($file_path));
+
+  return $response;
+}
 
 
   public function textbook_companion_download_sample_code() {
@@ -1065,65 +1137,271 @@ class DefaultController extends ControllerBase {
     readfile($root_path . $example_file_data->samplefilepath);
   }
 
-  public function textbook_companion_download_chapter() {
+//   public function textbook_companion_download_chapter($chapter_id) {
+//     // $chapter_id = arg(3);
+//             $route_match = \Drupal::routeMatch();
+
+// $chapter_id = (int) $route_match->getParameter('chapter_id');
+//     /* get solution data */
+//     $root_path = \Drupal::service("textbook_companion_global")->textbook_companion_path();
+// // var_Dump($root_path);die;
+//     /* get example data */
+//     /*$chapter_q = db_query("SELECT * FROM {textbook_companion_chapter} WHERE id = %d", $chapter_id);
+//     $chapter_data = db_fetch_object($chapter_q);*/
+//     $query = \Drupal::database()->select('textbook_companion_chapter');
+//     $query->fields('textbook_companion_chapter');
+//     $query->condition('number', $chapter_id);
+//     $result = $query->execute();
+//     $chapter_data = $result->fetchObject();
+//     $CH_PATH = 'CH' . $chapter_data->number . '/';
+//     // var_dump($chapter_id);die;
+//     // var_dump($chapter_data);die;
+//     /* zip filename */
+//     $zip_filename = $root_path . 'zip-' . time() . '-' . rand(0, 999999) . '.zip';
+//     /* creating zip archive on the server */
+//           $zip = new \ZipArchive();
+//     $zip->open($zip_filename,\ZipArchive::CREATE);
+
+//     /*$example_q = db_query("SELECT * FROM {textbook_companion_example} WHERE chapter_id = %d AND approval_status = 1", $chapter_id);*/
+//     $query = \Drupal::database()->select('textbook_companion_example');
+//     $query->fields('textbook_companion_example');
+//     $query->condition('chapter_id', $chapter_id);
+//     $query->condition('approval_status', 1);
+//     $example_q = $query->execute();
+//     while ($example_row = $example_q->fetchObject()) {
+//       $EX_PATH = 'EX' . $example_row->number . '/';
+//       /*$example_files_q = db_query("SELECT * FROM {textbook_companion_example_files} WHERE example_id = %d", $example_row->id);*/
+//       /*$query = db_select('textbook_companion_example_files');
+//         $query->fields('textbook_companion_example_files');
+//         $query->condition('example_id', $example_row->id);
+//         $example_files_q = $query->execute();*/
+//       $example_files_q = \Drupal::database()->select("select * from textbook_companion_preference tcp join textbook_companion_chapter tcc on tcp.id=tcc.preference_id join textbook_companion_example tce ON tcc.id=tce.chapter_id join textbook_companion_example_files tcef on tce.id=tcef.example_id where tcef.example_id= :example_id", [
+//         ':example_id' => $example_row->id
+//         ]);
+//       while ($example_files_row = $example_files_q->fetchObject()) {
+//         $zip->addFile($root_path . $example_files_row->directory_name . '/' . $example_files_row->filepath, $CH_PATH . $EX_PATH . $example_files_row->filename);
+//       }
+//     }
+//     $zip_file_count = $zip->numFiles;
+//     $zip->close();
+//     if ($zip_file_count > 0) {
+//       /* download zip file */
+//       header('Content-Type: application/zip');
+//       header('Content-disposition: attachment; filename="CH' . $chapter_data->number . '.zip"');
+//       header('Content-Length: ' . filesize($zip_filename));
+//       ob_clean();
+//       readfile($zip_filename);
+//       unlink($zip_filename);
+//     }
+//     else {
+//       \Drupal::messenger()->addMessage("There are no examples in this chapter to download", 'error');
+//       //drupal_goto('textbook-companion/textbook-run');
+//     }
+//   }
+
+
+public function textbook_companion_download_chapter() {
     // $chapter_id = arg(3);
             $route_match = \Drupal::routeMatch();
 
 $chapter_id = (int) $route_match->getParameter('chapter_id');
-    /* get solution data */
+
     $root_path = \Drupal::service("textbook_companion_global")->textbook_companion_path();
 
-    /* get example data */
-    /*$chapter_q = db_query("SELECT * FROM {textbook_companion_chapter} WHERE id = %d", $chapter_id);
-    $chapter_data = db_fetch_object($chapter_q);*/
+// $connection = \Drupal::service('database');
+ $connection = \Drupal::database();
+    // $query = \Drupal::database()->select('textbook_companion_preference');
+    // $query->fields('textbook_companion_preference');
+    // $query->condition('id', $book_id);
+    // $result = $query->execute();
+    // $book_data = $result->fetchObject();
+    // Load chapter.
+    // $query = $connection->select('textbook_companion_chapter', 'tcc')
+    //   ->fields('tcc')
+    //   ->condition('number', $chapter_id);
+    // $chapter_data = $query->execute()->fetchObject();
+    //  $chapter_data = db_fetch_object($chapter_q);*/
     $query = \Drupal::database()->select('textbook_companion_chapter');
     $query->fields('textbook_companion_chapter');
     $query->condition('id', $chapter_id);
     $result = $query->execute();
     $chapter_data = $result->fetchObject();
     $CH_PATH = 'CH' . $chapter_data->number . '/';
-    /* zip filename */
+   
+
+    // if (!$chapter_data) {
+    //   \Drupal::messenger()->addMessage("Invalid chapter.", 'error');
+    //   // return new RedirectResponse('/textbook-companion/textbook-run');
+    //         return $this->redirect('textbook_companion.run_form', ['book_pref_id' => $book_id]);
+
+    // }
+
+    // $CH_PATH = 'CH' . $chapter_data->number . '/';
     $zip_filename = $root_path . 'zip-' . time() . '-' . rand(0, 999999) . '.zip';
-    /* creating zip archive on the server */
+
     $zip = new \ZipArchive();
     $zip->open($zip_filename, \ZipArchive::CREATE);
-    die;
-    /*$example_q = db_query("SELECT * FROM {textbook_companion_example} WHERE chapter_id = %d AND approval_status = 1", $chapter_id);*/
+
+    // Fetch approved examples.
     $query = \Drupal::database()->select('textbook_companion_example');
     $query->fields('textbook_companion_example');
     $query->condition('chapter_id', $chapter_id);
     $query->condition('approval_status', 1);
     $example_q = $query->execute();
-    while ($example_row = $example_q->fetchObject()) {
+    // $example_q_data = $example_q->fetchObject();
+    foreach ($example_q as $example_row) {
       $EX_PATH = 'EX' . $example_row->number . '/';
-      /*$example_files_q = db_query("SELECT * FROM {textbook_companion_example_files} WHERE example_id = %d", $example_row->id);*/
-      /*$query = db_select('textbook_companion_example_files');
-        $query->fields('textbook_companion_example_files');
-        $query->condition('example_id', $example_row->id);
-        $example_files_q = $query->execute();*/
-      $example_files_q = \Drupal::database()->select("select * from textbook_companion_preference tcp join textbook_companion_chapter tcc on tcp.id=tcc.preference_id join textbook_companion_example tce ON tcc.id=tce.chapter_id join textbook_companion_example_files tcef on tce.id=tcef.example_id where tcef.example_id= :example_id", [
-        ':example_id' => $example_row->id
-        ]);
-      while ($example_files_row = $example_files_q->fetchObject()) {
-        $zip->addFile($root_path . $example_files_row->directory_name . '/' . $example_files_row->filepath, $CH_PATH . $EX_PATH . $example_files_row->filename);
+
+      // Fetch files for this example.
+      $example_files_q = $connection->query(
+        "SELECT tcef.* , tcp.directory_name
+         FROM {textbook_companion_preference} tcp
+         JOIN {textbook_companion_chapter} tcc ON tcp.id = tcc.preference_id 
+         JOIN {textbook_companion_example} tce ON tcc.id = tce.chapter_id 
+         JOIN {textbook_companion_example_files} tcef ON tce.id = tcef.example_id 
+         WHERE tcef.example_id = :example_id",
+        [':example_id' => $example_row->id]
+      );
+  
+ $example_files_q_data =   $example_files_q->fetchAll();
+      foreach ($example_files_q_data as $example_files_row) {
+        $zip->addFile(
+          $root_path . $example_files_row->directory_name . '/' . $example_files_row->filepath,
+          $CH_PATH . $EX_PATH . $example_files_row->filename
+        );
       }
-    }
+      // while ($example_files_row = $example_files_q->fetchObject())
+      //     {
+      //       $zip->addFile($root_path . $example_files_row->directory_name . '/' . $example_files_row->filepath, $CH_PATH . $EX_PATH . $example_files_row->filename);
+      //     }
+      }
+        // var_dump($example_file_q);die;
+// var_dump($example_file_q);die;
     $zip_file_count = $zip->numFiles;
     $zip->close();
-    if ($zip_file_count > 0) {
-      /* download zip file */
-      header('Content-Type: application/zip');
-      header('Content-disposition: attachment; filename="CH' . $chapter_data->number . '.zip"');
-      header('Content-Length: ' . filesize($zip_filename));
-      ob_clean();
-      readfile($zip_filename);
-      unlink($zip_filename);
-    }
+
+
+
+       if ($zip_file_count > 0)
+      {
+        /* download zip file */
+        header('Content-Type: application/zip');
+        header('Content-disposition: attachment; filename="CH' . $chapter_data->number . '.zip"');
+        header('Content-Length: ' . filesize($zip_filename));
+        ob_clean();
+        readfile($zip_filename);
+        unlink($zip_filename);
+      }
+   
+      
+    
     else {
-      \Drupal::messenger()->addMessage("There are no examples in this chapter to download", 'error');
-      //drupal_goto('textbook-companion/textbook-run');
-    }
+
+ 
+
+// Show error message
+$this->messenger()->addMessage("There are no examples in this chapter to download", 'error');
+
+// Redirect to a route
+$url = Url::fromRoute('textbook_companion.run_form'); // Use your route name
+return new RedirectResponse($url->toString());
+
+      // \Drupal::messenger()->addMessage("There are no examples in this chapter to download", 'error');
+      // return new RedirectResponse('/textbook-companion/textbook-run');
+      // return $this->redirect('textbook_companion.run_form', ['book_pref_id' => $book_id]);
+// $url = Url::fromRoute('textbook_companion.run_form');
+// return new RedirectResponse($url->toString());
+// return \Drupal::messenger()->addMessage("There are no examples in this chapter to download", 'error');;
+    
   }
+
+
+
+  }
+
+
+
+// public function textbook_companion_download_chapter() {
+//   $route_match = \Drupal::routeMatch();
+//   $chapter_id = (int) $route_match->getParameter('chapter_id');
+
+//   $connection = \Drupal::database();
+//   $root_path = \Drupal::service("textbook_companion_global")->textbook_companion_path();
+
+//   // Load chapter data.
+//   $query = $connection->select('textbook_companion_chapter', 'tcc')
+//     ->fields('tcc')
+//     ->condition('id', $chapter_id);
+//   $chapter_data = $query->execute()->fetchObject();
+
+//   if (!$chapter_data) {
+//     \Drupal::messenger()->addMessage("Invalid chapter.", 'error');
+//     $url = Url::fromRoute('textbook_companion.run_form');
+//     return new RedirectResponse($url->toString());
+//   }
+
+//   $CH_PATH = 'CH' . $chapter_data->number . '/';
+//   $zip_filename = $root_path . 'zip-' . time() . '-' . rand(0, 999999) . '.zip';
+
+//   $zip = new \ZipArchive();
+//   $zip->open($zip_filename, \ZipArchive::CREATE);
+
+//   // Fetch approved examples for this chapter.
+//   $example_q = $connection->select('textbook_companion_example', 'tce')
+//     ->fields('tce')
+//     ->condition('chapter_id', $chapter_id)
+//     ->condition('approval_status', 1)
+//     ->execute();
+
+//   $example_count = 0;
+
+//   while ($example_row = $example_q->fetchObject()) {
+//     $example_count++;
+//     $EX_PATH = 'EX' . $example_row->number . '/';
+
+//     // Fetch files for each example.
+//     $example_files_q = $connection->query(
+//       "SELECT tcef.* 
+//        FROM {textbook_companion_preference} tcp 
+//        JOIN {textbook_companion_chapter} tcc ON tcp.id = tcc.preference_id 
+//        JOIN {textbook_companion_example} tce ON tcc.id = tce.chapter_id 
+//        JOIN {textbook_companion_example_files} tcef ON tce.id = tcef.example_id 
+//        WHERE tcef.example_id = :example_id",
+//       [':example_id' => $example_row->id]
+//     );
+
+//     while ($example_files_row = $example_files_q->fetchObject()) {
+//       $src = $root_path . $example_files_row->directory_name . '/' . $example_files_row->filepath;
+//       if (file_exists($src)) {
+//         $zip->addFile($src, $CH_PATH . $EX_PATH . $example_files_row->filename);
+//       }
+//     }
+//   }
+
+//   $zip_file_count = $zip->numFiles;
+//   $zip->close();
+
+//   // Handle download or error cases.
+//   if ($zip_file_count > 0) {
+//     $response = new BinaryFileResponse($zip_filename);
+//     $response->setContentDisposition(
+//       ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+//       'CH' . $chapter_data->number . '.zip'
+//     );
+
+//     // Delete zip after sending to user.
+//     $response->deleteFileAfterSend(true);
+
+//     return $response;
+//   }
+//   else {
+//     \Drupal::messenger()->addMessage("There are no examples in this chapter to download", 'error');
+//     $url = Url::fromRoute('textbook_companion.run_form');
+//     return new RedirectResponse($url->toString());
+//   }
+// }
+
+
 
 
 
@@ -1783,20 +2061,22 @@ return $this->redirect('textbook_companion.run_form', ['book_pref_id' => $book_i
   public function textbook_companion_download_example($example_id) {
     $root_path = \Drupal::service("textbook_companion_global")->textbook_companion_path();
 
+     $connection = \Drupal::database();
+
     // Fetch example data
-    $example_data = $this->database->select('textbook_companion_example', 'tce')
+    $example_data = \Drupal::database()->select('textbook_companion_example', 'tce')
       ->fields('tce')
       ->condition('id', $example_id)
       ->execute()
       ->fetchObject();
 
-    if (!$example_data) {
-      $this->messenger()->addError($this->t('Example not found.'));
-      return $this->redirect('/textbook-companion/textbook-run');
-    }
+    // if (!$example_data) {
+    //   $this->messenger()->addError($this->t('Example not found.'));
+    //   return $this->redirect('/textbook-companion/textbook-run');
+    // }
 
     // Fetch example files
-    $example_files = $this->database->query("
+    $example_files = \Drupal::database()->query("
       SELECT * FROM textbook_companion_preference tcp
       JOIN textbook_companion_chapter tcc ON tcp.id = tcc.preference_id
       JOIN textbook_companion_example tce ON tcc.id = tce.chapter_id
@@ -1807,16 +2087,23 @@ return $this->redirect('textbook_companion.run_form', ['book_pref_id' => $book_i
     $EX_PATH = 'EX' . $example_data->number . '/';
     $zip_filename = $root_path . 'zip-' . time() . '-' . rand(0, 999999) . '.zip';
 
+    // var_dump($zip_filename);die;
+
     $zip = new \ZipArchive();
     $zip->open($zip_filename, \ZipArchive::CREATE);
+
 
     foreach ($example_files as $file_row) {
       $zip->addFile($root_path . $file_row->directory_name . '/' . $file_row->filepath, $EX_PATH . $file_row->filename);
     }
+// 
+    // var_dump($root_path . $file_row->directory_name . '/' . $file_row->filepath, $EX_PATH . $file_row->filename );die;
+    
+        $zip_file_count = $zip->numFiles;
 
     $zip->close();
 
-    if ($zip->numFiles > 0) {
+    if ($zip_file_count > 0) {
       $response = new Response(file_get_contents($zip_filename));
       $response->headers->set('Content-Type', 'application/octet-stream');
       $response->headers->set('Content-Disposition', 'attachment; filename="EX' . $example_data->number . '.zip"');
@@ -1824,11 +2111,17 @@ return $this->redirect('textbook_companion.run_form', ['book_pref_id' => $book_i
 
       unlink($zip_filename);
       return $response;
-    } else {
+    } 
+    else {
       $this->messenger()->addError($this->t('There are no files in this example to download.'));
-      return $this->redirect('/textbook-companion/textbook-run');
+      // return $this->redirect('/textbook-companion/textbook-run');
     }
   }
+
+
+
+
+
 }
 
 
