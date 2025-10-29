@@ -14,7 +14,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'create book proposal'
         ),
-        'type' => MENU_CALLBACK
+        // 'type' => MENU_CALLBACK
     );
     /*$items["aicte_proposal"] = array(
     "title" => "AICTE Book Proposal",
@@ -30,7 +30,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'create book proposal'
         ),
-        'type' => MENU_CALLBACK
+        // 'type' => MENU_CALLBACK
     );
     /* for reviewers */
     $items['textbook-companion/manage-proposal'] = array(
@@ -51,7 +51,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve book proposal'
         ),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
+        // 'type' => MENU_DEFAULT_LOCAL_TASK,
         'weight' => 1,
         'file' => 'manage_proposal.inc'
     );
@@ -63,7 +63,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve book proposal'
         ),
-        'type' => MENU_LOCAL_TASK,
+        // 'type' => MENU_LOCAL_TASK,
         'weight' => 2,
         'file' => 'manage_proposal.inc'
     );
@@ -85,7 +85,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve book proposal'
         ),
-        'type' => MENU_LOCAL_TASK,
+        // 'type' => MENU_LOCAL_TASK,
         'weight' => 3,
         'file' => 'manage_proposal.inc'
     );
@@ -99,7 +99,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve book proposal'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'manage_proposal.inc'
     );
     $items['textbook-companion/manage-proposal/status'] = array(
@@ -112,7 +112,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve book proposal'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'manage_proposal.inc'
     );
     $items['textbook-companion/manage-proposal/edit'] = array(
@@ -125,7 +125,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'edit book proposal'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'manage_proposal.inc'
     );
     /*$items['manage_proposal/category/edit'] = array(
@@ -144,7 +144,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve code'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        // 'type' => MENU_NORMAL_ITEM,
         'file' => 'code_approval.inc'
     );
     $items['textbook-companion/code-approval/approve'] = array(
@@ -157,7 +157,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve code'
         ),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
+        // 'type' => MENU_DEFAULT_LOCAL_TASK,
         'weight' => 1,
         'file' => 'code_approval.inc'
     );
@@ -171,7 +171,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'bulk manage code'
         ),
-        'type' => MENU_LOCAL_TASK,
+        // 'type' => MENU_LOCAL_TASK,
         'weight' => 2,
         'file' => 'code_approval.inc'
     );
@@ -185,7 +185,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'weight' => 3,
         'file' => 'editcodeadmin.inc'
     );
@@ -199,7 +199,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'bulk manage code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'weight' => 4,
         'file' => 'notes.inc'
     );
@@ -230,7 +230,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'upload code'
         ),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
+        // 'type' => MENU_DEFAULT_LOCAL_TASK,
         'file' => 'general.inc',
         'weight' => 1
     );
@@ -241,7 +241,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'upload code'
         ),
-        'type' => MENU_LOCAL_TASK,
+        // 'type' => MENU_LOCAL_TASK,
         'file' => 'code.inc',
         'weight' => 2
     );
@@ -281,7 +281,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'edit uploaded code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'editcode.inc'
     );
     $items['textbook-companion/code/delete'] = array(
@@ -291,7 +291,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'upload code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'code.inc'
     );
     $items['textbook-companion/code/chapter/edit'] = array(
@@ -304,7 +304,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'upload code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'editcode.inc'
     );
     $items['textbook-companion/code/list-examples'] = array(
@@ -314,7 +314,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'upload code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'general.inc',
         'weight' => 3
     );
@@ -328,7 +328,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'access content'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        // 'type' => MENU_NORMAL_ITEM,
         'file' => 'search.inc'
     );
     $items['textbook-companion/textbook-search/search'] = array(
@@ -341,7 +341,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'access content'
         ),
-        'type' => MENU_DEFAULT_LOCAL_TASK,
+        // 'type' => MENU_DEFAULT_LOCAL_TASK,
         'file' => 'search.inc',
         'weight' => 1
     );
@@ -352,7 +352,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'access content'
         ),
-        'type' => MENU_LOCAL_TASK,
+        // 'type' => MENU_LOCAL_TASK,
         'file' => 'search.inc',
         'weight' => 2
     );
@@ -363,7 +363,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'access content'
         ),
-        'type' => MENU_LOCAL_TASK,
+        // 'type' => MENU_LOCAL_TASK,
         'file' => 'search.inc',
         'weight' => 3
     );
@@ -378,7 +378,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'access content'
         ),
-        'type' => MENU_LOCAL_TASK,
+        // 'type' => MENU_LOCAL_TASK,
         'file' => 'search.inc',
         'weight' => 4
     );
@@ -389,7 +389,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'access content'
         ),
-        'type' => MENU_LOCAL_TASK,
+        // 'type' => MENU_LOCAL_TASK,
         'file' => 'search.inc',
         'weight' => 5
     );
@@ -410,7 +410,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'access content'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        // 'type' => MENU_NORMAL_ITEM,
         'file' => 'run.inc'
     );
     /*$items['textbook_run_ajax'] = array(
@@ -435,7 +435,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'access content'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        // 'type' => MENU_NORMAL_ITEM,
         'file' => 'run.inc'
     );
     /* download callbacks */
@@ -446,7 +446,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'download code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'download.inc'
     );
     $items['textbook-companion/download/samplecode'] = array(
@@ -456,7 +456,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'download code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'download.inc'
     );
     /* $items['download/dependency'] = array(
@@ -474,7 +474,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'download code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'download.inc'
     );
     $items['textbook-companion/download/chapter'] = array(
@@ -484,7 +484,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'download code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'download.inc'
     );
     $items['textbook-companion/download/book'] = array(
@@ -494,7 +494,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'download code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'download.inc'
     );
     /* reviewer download */
@@ -505,7 +505,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'full_download.inc'
     );
     $items['textbook-companion/full-download/book'] = array(
@@ -515,7 +515,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'full_download.inc'
     );
     /* external reviewer download */
@@ -526,7 +526,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'download books to review'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'full_download.inc'
     );
     $items['textbook-companion/full-download-external/book'] = array(
@@ -536,7 +536,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'download books to review'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'full_download.inc'
     );
     /* latex script for book generation */
@@ -547,7 +547,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'generate book'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'latex.inc'
     );
     $items['textbook-companion/delete-book'] = array(
@@ -557,7 +557,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'approve code'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'latex.inc'
     );
     /* general purpose callbacks */
@@ -568,7 +568,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'access content'
         ),
-        'type' => MENU_CALLBACK
+        // 'type' => MENU_CALLBACK
     );
     /* for admin */
     $items['admin/settings/book_companion'] = array(
@@ -581,7 +581,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'administer book companion'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        // 'type' => MENU_NORMAL_ITEM,
         'file' => 'settings.inc'
     );
     /* for data entry */
@@ -601,7 +601,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'dataentry book proposal'
         ),
-        'type' => MENU_NORMAL_ITEM,
+        // 'type' => MENU_NORMAL_ITEM,
         'file' => 'manage_proposal.inc'
     );
     /*Cheque Details and Contact Form */
@@ -680,7 +680,7 @@ function textbook_companion_menu()
 		'page arguments' => array(
 			'generate_pdf'
 		),
-		'type' => MENU_CALLBACK,
+		// 'type' => MENU_CALLBACK,
 		'access arguments' => array(
 			'generate pdf'
 		),
@@ -692,7 +692,7 @@ function textbook_companion_menu()
 		"access arguments" => array(
 			"verify certificates"
 		),
-		'type' => MENU_CALLBACK,
+		// 'type' => MENU_CALLBACK,
 	'file' => 'pdf/verify_certificates.inc',
 	);
     $items['textbook-companion/manage-proposal/paper-submission'] = array(
@@ -705,7 +705,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'paper submission form'
         ),
-        'type' => MENU_CALLBACK,
+        // 'type' => MENU_CALLBACK,
         'file' => 'cheque_contact.inc'
     );
     $items["textbook-companion/nonaicte-proposal"] = array(
@@ -715,7 +715,7 @@ function textbook_companion_menu()
         'access arguments' => array(
             'create book proposal'
         ),
-        'type' => MENU_CALLBACK
+        // 'type' => MENU_CALLBACK
     );
     return $items;
 }

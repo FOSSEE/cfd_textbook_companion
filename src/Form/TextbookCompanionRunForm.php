@@ -175,113 +175,7 @@ class TextbookCompanionRunForm extends FormBase {
     ];
 
 
-    // //  code for download the file and display the filename and type
-    
-// ... (Your code up to the example select field) ...
-//     $selected_example = $form_state->getValue('examples') ?? 0;
-
-//     // ---------------------------
-//     // Example Details Wrapper (Link + File Table)
-//     // ---------------------------
-//     // This wrapper is the target for the example changed AJAX callback.
    
-//     // ---------------------------
-//     // This wrapper contains everything that depends on the selected chapter.
-//     $form['example_wrapper'] = [
-//       '#type' => 'container',
-//       '#attributes' => ['id' => 'example-wrapper'],
-//     ];
-
-//     $form['example_wrapper']['examples'] = [
-//       '#type' => 'select',
-//       '#title' => $this->t('Example No. (Caption):'),
-//       '#options' => $this->_list_of_examples($chapter_id),
-//       '#ajax' => [
-//         'callback' => '::ajax_example_changed_callback',
-//         // ✅ UPDATED: Point to the new, more specific wrapper for the example link and table.
-//         'wrapper' => 'download-example-link-wrapper',
-//       ],
-//       '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
-//     ];
-
-//     // ✅ NEW: A dedicated wrapper for the link AND the table (changed to fieldset).
-//     $form['example_wrapper']['download_example_link_wrapper'] = [
-//         '#type' => 'fieldset', // Changed from 'container' to 'fieldset'
-//         '#title' => $this->t('Example Details'), // Added a title for the fieldset
-//         '#attributes' => ['id' => 'download-example-link-wrapper'],
-//         // The states array ensures the whole fieldset is invisible if no example is selected.
-//         '#states' => ['invisible' => [':input[name="examples"]' => ['value' => 0]]],
-//     ];
-    
-//     // Example Download Link (now inside the fieldset)
-//     $form['example_wrapper']['download_example_link_wrapper']['example_download'] = [
-//         '#type' => 'item',
-//         '#markup' => Link::fromTextAndUrl(
-//             $this->t('Download OpenFOAM code for the example' ),
-//             Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
-//         )->toString(),
-//         // State is redundant here since it's on the fieldset, but harmless.
-//     ];
-
-//     // //  code for download the file and display the filename and type
-    
-//     // NOTE: It seems you meant to use $selected_example instead of $form_state->getValue('example_file_id') 
-//     // to query for the files associated with the currently selected example.
-//     // Assuming $selected_example is the correct ID to query.
-//     $example_id = $selected_example; // Use the ID of the selected example.
-
-//     $query = \Drupal::database()->select('textbook_companion_example_files', 's');
-//     $query->fields('s'); // All fields
-//     $query->condition('example_id', $example_id);
-//     $results = $query->execute();
-
-//     $example_files_rows = [];
-
-//     if ($results) {
-//         while ($row = $results->fetchObject()) {
-
-//             switch ($row->filetype) {
-//                 case 'S':
-//                     $file_type = $this->t('Source or Main file');
-//                     break;
-//                 case 'R':
-//                     $file_type = $this->t('Result file');
-//                     break;
-//                 case 'X':
-//                     $file_type = $this->t('xcos file');
-//                     break;
-//                 default:
-//                     $file_type = $this->t('Unknown');
-//             }
-
-//             $example_files_rows[] = [
-//                 Link::fromTextAndUrl(
-//                     $row->filename,
-//                     Url::fromRoute('textbook_companion.download_file', ['id' => $row->id])
-//                 )->toRenderable(),
-//                 $file_type,
-//             ];
-//         }
-//     }
-
-//     // Add table inside the dedicated wrapper/fieldset
-//     $table = [
-//         '#type' => 'table',
-//         '#header' => [$this->t('Filename'), $this->t('Type')],
-//         '#rows' => $example_files_rows,
-//         // '#empty' => $this->t('No individual files found for this example.'), // Added empty text
-//         '#attributes' => [
-//             'style' => 'width: 100%;',
-//         ],
-//     ];
-
-//     $form['example_wrapper']['download_example_link_wrapper']['example_files_table'] = $table; // Placed inside the fieldset 
-    
-
-//  return $form;
-//   }
-// ... (code before example selection) ...
-
     $selected_example = $form_state->getValue('examples') ?? 0;
 
     // ---------------------------
@@ -324,56 +218,50 @@ class TextbookCompanionRunForm extends FormBase {
     // ---------------------------
     // Code to build the file table
     // ---------------------------
-    $example_file_id = $selected_example; 
+    $example_file_id = $selected_example;
 
-    $query = \Drupal::database()->select('textbook_companion_example_files', 's');
-    $query->fields('s'); 
-    $query->condition('example_id', $example_id);
-    $results = $query->execute();
+$query = \Drupal::database()->select('textbook_companion_example_files', 's');
+$query->fields('s');
+$query->condition('example_id', $example_file_id);
+$results = $query->execute();
 
-    $example_files_rows = [];
-
-    if ($results) {
-        while ($row = $results->fetchObject()) {
-
-            switch ($row->filetype) {
-                case 'S':
-                    $file_type = $this->t('Source or Main file');
-                    break;
-                case 'R':
-                    $file_type = $this->t('Result file');
-                    break;
-                case 'X':
-                    $file_type = $this->t('xcos file');
-                    break;
-                default:
-                    $file_type = $this->t('Unknown');
-            }
-
-            $example_files_rows[] = [
-                Link::fromTextAndUrl(
-                    $row->filename,
-                    Url::fromRoute('textbook_companion.download_file', ['id' => $example_file_id])
-                )->toRenderable(),
-                $file_type,
-            ];
-        }
+$example_files_rows = [];
+if ($results) {
+  foreach ($results as $row) {
+    switch ($row->filetype) {
+      case 'S':
+        $file_type = $this->t('Source or Main file');
+        break;
+      case 'R':
+        $file_type = $this->t('Result file');
+        break;
+      case 'X':
+        $file_type = $this->t('xcos file');
+        break;
+      default:
+        $file_type = $this->t('Unknown');
     }
 
-    // 2. The Table (Appears second/below)
-    $table = [
-        '#type' => 'table',
-        '#header' => [$this->t('Filename'), $this->t('Type')],
-        '#rows' => $example_files_rows,
-        '#empty' => $this->t('No individual files found for this example.'),
-        '#attributes' => [
-            'style' => 'width: 100%;',
-        ],
+    $example_files_rows[] = [
+      Link::fromTextAndUrl(
+        $row->filename,
+        Url::fromRoute('textbook_companion.download_file', ['id' => $row->id])
+      )->toRenderable(),
+      $file_type,
     ];
+  }
+}
 
-    $form['example_wrapper']['download_example_link_wrapper']['example_files_table'] = $table;
-    
-    // ... (rest of your buildForm function) ...
+$table = [
+  '#type' => 'table',
+  '#header' => [$this->t('Filename'), $this->t('Type')],
+  '#rows' => $example_files_rows,
+  // '#empty' => $this->t('No individual files found for this example.'),
+  '#attributes' => ['style' => 'width: 100%;'],
+];
+
+// $form['example_wrapper']['download_example_link_wrapper']['example_files_table'] = $table;
+
 
  return $form;
   }
