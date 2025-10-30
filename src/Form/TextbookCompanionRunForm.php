@@ -18,33 +18,8 @@ class TextbookCompanionRunForm extends FormBase {
     return 'textbook_companion_run_form';
   }
 
-  /**
-   * Helper function to generate the Chapter Download Link markup.
-   *
-   * @param int $chapter_id
-   * The ID of the currently selected chapter.
-   * @return string
-   * The HTML markup for the download link.
-   */
-  private function getChapterDownloadLinkMarkup($chapter_id) {
-    if (!$chapter_id) {
-        return '';
-    }
-
-    $link = Link::fromTextAndUrl(
-        $this->t('Download Chapter'),
-        Url::fromRoute('textbook_companion.download_chapter', ['chapter_id' => $chapter_id])
-    )->toString();
-
-    return $link;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildForm(array $form, FormStateInterface $form_state) {
-    // ... (Your existing code for getting default values is fine) ...
-
+   
+   public function buildForm(array $form, FormStateInterface $form_state) {
     $url_book_pref_id = \Drupal::request()->attributes->get('book_pref_id') ?? 0;
     $category_default_value = 0;
 
@@ -56,11 +31,12 @@ class TextbookCompanionRunForm extends FormBase {
       $category_default_value = $result ? $result->category : 0;
     }
 
-    $selected_book = $form_state->getValue('book') ?? $url_book_pref_id;
+    // Values from form_state (AJAX) or route attribute defaults.
+    $selected_book = (int) ($form_state->getValue('book') ?: $url_book_pref_id);
+    $selected_chapter = (int) $form_state->getValue('chapter');
+    $selected_example = (int) $form_state->getValue('example');
 
-    // ---------------------------
-    // BOOK SELECT FIELD
-    // ---------------------------
+    // BOOK select (top-level)
     $form['book'] = [
       '#type' => 'select',
       '#title' => $this->t('Title of the book'),
@@ -68,108 +44,69 @@ class TextbookCompanionRunForm extends FormBase {
       '#default_value' => $selected_book,
       '#ajax' => [
         'callback' => '::ajax_book_changed_callback',
-        'wrapper' => 'book-dependents-wrapper',
+        'wrapper' => 'textbook-book-wrapper',
         'event' => 'change',
       ],
     ];
 
-    // This wrapper contains everything that depends on the selected book.
-    $form['book_dependents_wrapper'] = [
-        '#type' => 'container',
-        '#attributes' => ['id' => 'book-dependents-wrapper'],
-    ];
-
-    $book_info = $selected_book ? $this->_html_book_info($selected_book) : '';
-    $form['book_dependents_wrapper']['book_details_wrapper'] = [
+    // BOOK WRAPPER (contains book info, chapter select & chapter download)
+    $form['book_wrapper'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'ajax-book-details'],
-      '#markup' => $book_info,
+      '#attributes' => ['id' => 'textbook-book-wrapper'],
     ];
 
-    $form['book_dependents_wrapper']['download_book'] = [
-      '#type' => 'item',
-      '#markup' => Link::fromTextAndUrl(
-        $this->t('Download Book'),
-        Url::fromRoute('textbook_companion.download_book', ['book_id' => $selected_book])
-      )->toString() . ' ' . $this->t('(Download the OpenFOAM codes for all the solved examples)'),
-      '#states' => [ 'invisible' => [':input[name="book"]' => ['value' => 0]]],
-    ];
+    if ($selected_book) {
+      // Book info markup
+      $form['book_wrapper']['book_info'] = [
+        '#type' => 'markup',
+        '#markup' => $this->_html_book_info($selected_book),
+      ];
 
-    // // ---------------------------
-    // // Chapter select and its download link
-    // // ---------------------------
-    $chapter_id = $form_state->getValue('chapter') ?? 0;
-    $form['book_dependents_wrapper']['chapter'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Title of the chapter'),
-      '#options' => $this->_list_of_chapters($selected_book),
-      '#default_value' => $chapter_id,
-      '#ajax' => [
-        'callback' => '::ajax_chapter_changed_callback',
-        'wrapper' => 'example-wrapper', // Target the wrapper for the examples.
-      ],
-      '#states' => [ 'invisible' => [':input[name="book"]' => ['value' => 0]]],
-    ];
-
-    // ✅ FIX: The chapter download link is now wrapped in its own specific container
-    // so we can update it precisely in the AJAX callback.
-    $form['book_dependents_wrapper']['chapter_download_wrapper'] = [
-        '#type' => 'container',
-        '#attributes' => ['id' => 'chapter-download-link-wrapper'],
-        // The link element is now inside the wrapper
-        'chapter_download_item' => [
-            '#type' => 'item',
-            '#markup' => $this->getChapterDownloadLinkMarkup($chapter_id),
-            '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
-        ],
-        // The states array needs to be on the container now if you want to hide the whole thing
-        '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
-    ];
-
-
-    
-    $selected_example = $form_state->getValue('examples') ?? 0;
-
-    // This wrapper contains everything that depends on the selected chapter.
-    $form['example_wrapper'] = [
-      '#type' => 'container',
-      '#attributes' => ['id' => 'example-wrapper'],
-    ];
-
-    $form['example_wrapper']['examples'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Example No. (Caption):'),
-      '#options' => $this->_list_of_examples($chapter_id),
-      '#ajax' => [
-        'callback' => '::ajax_example_changed_callback',
-        // ✅ UPDATED: Point to the new, more specific wrapper for the example link.
-        'wrapper' => 'download-example-link-wrapper',
-      ],
-      '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
-    ];
-
-    // ✅ NEW: A dedicated wrapper just for the example download link.
-    $form['example_wrapper']['download_example_link_wrapper'] = [
-        '#type' => 'container',
-        '#attributes' => ['id' => 'download-example-link-wrapper'],
-    ];
-    
-    $selected_example = $form_state->getValue('examples') ?? 0;
-    $form['example_wrapper']['download_example_link_wrapper']['example_download'] = [
-        '#type' => 'item',
+      // Download Book link
+      $form['book_wrapper']['download_book'] = [
+        '#type' => 'markup',
         '#markup' => Link::fromTextAndUrl(
-            $this->t('Download OpenFOAM code for the example' ),
-            Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
+          $this->t('Download Book'),
+          Url::fromRoute('textbook_companion.download_book', ['book_id' => $selected_book])
         )->toString(),
-        '#states' => ['invisible' => [':input[name="examples"]' => ['value' => 0]]],
-    ];
+      ];
 
+      // Chapter select
+      $form['book_wrapper']['chapter'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Title of the chapter'),
+        '#options' => $this->_list_of_chapters($selected_book),
+        '#default_value' => $selected_chapter,
+        '#ajax' => [
+          'callback' => '::ajax_chapter_changed_callback',
+          'wrapper' => 'chapter-download-wrapper',
+          'event' => 'change',
+        ],
+      ];
 
-   
-    // $selected_example = $form_state->getValue('examples') ?? 0;
+      // Chapter-download wrapper (inside book_wrapper)
+      $form['book_wrapper']['chapter_download'] = [
+        '#type' => 'container',
+        '#attributes' => ['id' => 'chapter-download-wrapper'],
+      ];
 
-    // ---------------------------
-    // This wrapper contains everything that depends on the selected chapter.
+      if ($selected_chapter) {
+        $form['book_wrapper']['chapter_download']['link'] = [
+          '#type' => 'markup',
+          '#markup' => Link::fromTextAndUrl(
+            $this->t('Download Chapter'),
+            Url::fromRoute('textbook_companion.download_chapter', ['chapter_id' => $selected_chapter])
+          )->toString(),
+        ];
+      }
+      
+    }
+
+    
+    
+    //    $selected_example = $form_state->getValue('examples') ?? 0;
+
+    // // This wrapper contains everything that depends on the selected chapter.
     // $form['example_wrapper'] = [
     //   '#type' => 'container',
     //   '#attributes' => ['id' => 'example-wrapper'],
@@ -181,118 +118,73 @@ class TextbookCompanionRunForm extends FormBase {
     //   '#options' => $this->_list_of_examples($chapter_id),
     //   '#ajax' => [
     //     'callback' => '::ajax_example_changed_callback',
-    //     // Target the fieldset wrapper for update
+    //     // ✅ UPDATED: Point to the new, more specific wrapper for the example link.
     //     'wrapper' => 'download-example-link-wrapper',
     //   ],
     //   '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
     // ];
 
-    // ✅ Fieldset wrapper for the link AND the table.
-    // $form['example_wrapper']['download_example_link_wrapper'] = [
-        // '#type' => 'fieldset', // Now a fieldset
-        // '#title' => $this->t('Example Files and Download'), 
-        // '#attributes' => ['id' => 'download-example-link-wrapper'],
-        // Hide the whole fieldset if no example is selected
-        // '#states' => ['invisible' => [':input[name="examples"]' => ['value' => 0]]],
-    // ];
-    
-    // 1. Download Link (Appears first/above)
-    // $form['example_wrapper']['download_example_link_wrapper']['example_download'] = [
-    //     '#type' => 'item',
+
+    //   $form['download_example_wrapper']['download_example'] = [
+    //     '#type' => 'markup',
     //     '#markup' => Link::fromTextAndUrl(
-    //         $this->t('Download OpenFOAM code for the example' ),
-    //         Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
+    //       $this->t('Download Example (OpenFOAM code)'),
+    //       Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
     //     )->toString(),
-    // ];
-
-    // ---------------------------
-    // Code to build the file table
-    // ---------------------------
-    $example_file_id = $selected_example;
-
-$query = \Drupal::database()->select('textbook_companion_example_files', 's');
-$query->fields('s');
-$query->condition('example_id', $example_file_id);
-$results = $query->execute();
-
-$example_files_rows = [];
-if ($results) {
-  foreach ($results as $row) {
-    switch ($row->filetype) {
-      case 'S':
-        $file_type = $this->t('Source or Main file');
-        break;
-      case 'R':
-        $file_type = $this->t('Result file');
-        break;
-      case 'X':
-        $file_type = $this->t('xcos file');
-        break;
-      default:
-        $file_type = $this->t('Unknown');
-    }
-
-    $example_files_rows[] = [
-      Link::fromTextAndUrl(
-        $row->filename,
-        Url::fromRoute('textbook_companion.download_file', ['id' => $row->id])
-      )->toRenderable(),
-      $file_type,
-    ];
-  }
-}
-
-$table = [
-  '#type' => 'table',
-  '#header' => [$this->t('Filename'), $this->t('Type')],
-  '#rows' => $example_files_rows,
-  '#empty' => $this->t('No individual files found for this example.'),
-  '#attributes' => ['style' => 'width: 100%;'],
+    //   ];
+    // Example Wrapper - Depends on chapter selection
+$form['book_wrapper']['chapter_download']['example_wrapper'] = [
+  '#type' => 'container',
+  '#attributes' => ['id' => 'example-wrapper'],
 ];
+    $selected_example = $form_state->getValue('examples') ?? 0;
 
-// $form['example_wrapper']['download_example_link_wrapper']['example_files_table'] = $table;
+  $form['book_wrapper']['chapter_download']['example_wrapper']['examples'] = [
+    '#type' => 'select',
+    '#title' => $this->t('Example No. (Caption)'),
+    '#options' => $this->_list_of_examples($selected_chapter),
+    '#default_value' => $selected_example,
+    '#ajax' => [
+      'callback' => '::ajax_example_changed_callback',
+      'wrapper' => 'download-example-link-wrapper',
+    ],
+  ];
+
+  // Wrapper for download example link
+  $form['book_wrapper']['chapter_download']['example_wrapper']['download_example_wrapper'] = [
+    '#type' => 'container',
+    '#attributes' => ['id' => 'download-example-link-wrapper'],
+  ];
+
+    $form['book_wrapper']['chapter_download']['example_wrapper']['download_example_wrapper']['download_example'] = [
+      '#type' => 'markup',
+      '#markup' => Link::fromTextAndUrl(
+        $this->t('Download Example (OpenFOAM code)'),
+        Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
+      )->toString(),
+    ];
+  
 
 
- return $form;
+   
+
+    return $form;
   }
-
-
-
   // ---------------------------
   // AJAX CALLBACKS
   // ---------------------------
 
-  
   public function ajax_book_changed_callback(array &$form, FormStateInterface $form_state) {
-    // Return the wrapper that contains everything dependent on the book selection.
-    return $form['book_dependents_wrapper'];
+    return $form['book_wrapper'];
   }
 
   public function ajax_chapter_changed_callback(array &$form, FormStateInterface $form_state) {
-    $response = new AjaxResponse();
-    $chapter_id = $form_state->getValue('chapter') ?? 0;
-    
-    // 1. Update the examples select field and its dependent link wrapper.
-    // This is the original part that returns the 'example-wrapper'.
-    $response->addCommand(new HtmlCommand('#example-wrapper', $form['example_wrapper']));
+    return $form['book_wrapper']['chapter_download'];
+  }
+public function ajax_example_changed_callback(array &$form, FormStateInterface $form_state) {
+  return $form['book_wrapper']['chapter_download']['example_wrapper']['download_example_wrapper'];
+}
 
-    // 2. ✅ FIX: Dynamically build the new chapter download link and update the item's markup.
-    $link_markup = $this->getChapterDownloadLinkMarkup($chapter_id);
-    
-    // We update the specific item inside the wrapper.
-    $response->addCommand(new HtmlCommand(
-        '#chapter-download-link-wrapper', 
-        $form['book_dependents_wrapper']['chapter_download_wrapper']['chapter_download_item']['#markup'] = $link_markup
-    ));
-    
-    
-    return $response;
-  }
-  
-  public function ajax_example_changed_callback(array &$form, FormStateInterface $form_state) {
-    // ✅ UPDATED: Return the new wrapper containing just the example download link.
-    return $form['example_wrapper']['download_example_link_wrapper'];
-  }
   //  ---------------------------
   // HELPER FUNCTIONS
   // ---------------------------
