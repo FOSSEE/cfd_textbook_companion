@@ -127,19 +127,9 @@ class TextbookCompanionRunForm extends FormBase {
     ];
 
 
-    // ---------------------------
-    // Example select and its download link
-
-    // ... (code before example selection)
-
+    
     $selected_example = $form_state->getValue('examples') ?? 0;
 
-    // ---------------------------
-    // Example Details Wrapper (Link + File Table)
-    // ---------------------------
-    // This wrapper is the target for the example changed AJAX callback.
-   
-    // ---------------------------
     // This wrapper contains everything that depends on the selected chapter.
     $form['example_wrapper'] = [
       '#type' => 'container',
@@ -176,44 +166,44 @@ class TextbookCompanionRunForm extends FormBase {
 
 
    
-    $selected_example = $form_state->getValue('examples') ?? 0;
+    // $selected_example = $form_state->getValue('examples') ?? 0;
 
     // ---------------------------
     // This wrapper contains everything that depends on the selected chapter.
-    $form['example_wrapper'] = [
-      '#type' => 'container',
-      '#attributes' => ['id' => 'example-wrapper'],
-    ];
+    // $form['example_wrapper'] = [
+    //   '#type' => 'container',
+    //   '#attributes' => ['id' => 'example-wrapper'],
+    // ];
 
-    $form['example_wrapper']['examples'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Example No. (Caption):'),
-      '#options' => $this->_list_of_examples($chapter_id),
-      '#ajax' => [
-        'callback' => '::ajax_example_changed_callback',
-        // Target the fieldset wrapper for update
-        'wrapper' => 'download-example-link-wrapper',
-      ],
-      '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
-    ];
+    // $form['example_wrapper']['examples'] = [
+    //   '#type' => 'select',
+    //   '#title' => $this->t('Example No. (Caption):'),
+    //   '#options' => $this->_list_of_examples($chapter_id),
+    //   '#ajax' => [
+    //     'callback' => '::ajax_example_changed_callback',
+    //     // Target the fieldset wrapper for update
+    //     'wrapper' => 'download-example-link-wrapper',
+    //   ],
+    //   '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
+    // ];
 
     // ✅ Fieldset wrapper for the link AND the table.
-    $form['example_wrapper']['download_example_link_wrapper'] = [
-        '#type' => 'fieldset', // Now a fieldset
+    // $form['example_wrapper']['download_example_link_wrapper'] = [
+        // '#type' => 'fieldset', // Now a fieldset
         // '#title' => $this->t('Example Files and Download'), 
-        '#attributes' => ['id' => 'download-example-link-wrapper'],
+        // '#attributes' => ['id' => 'download-example-link-wrapper'],
         // Hide the whole fieldset if no example is selected
         // '#states' => ['invisible' => [':input[name="examples"]' => ['value' => 0]]],
-    ];
+    // ];
     
     // 1. Download Link (Appears first/above)
-    $form['example_wrapper']['download_example_link_wrapper']['example_download'] = [
-        '#type' => 'item',
-        '#markup' => Link::fromTextAndUrl(
-            $this->t('Download OpenFOAM code for the example' ),
-            Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
-        )->toString(),
-    ];
+    // $form['example_wrapper']['download_example_link_wrapper']['example_download'] = [
+    //     '#type' => 'item',
+    //     '#markup' => Link::fromTextAndUrl(
+    //         $this->t('Download OpenFOAM code for the example' ),
+    //         Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
+    //     )->toString(),
+    // ];
 
     // ---------------------------
     // Code to build the file table
@@ -256,7 +246,7 @@ $table = [
   '#type' => 'table',
   '#header' => [$this->t('Filename'), $this->t('Type')],
   '#rows' => $example_files_rows,
-  // '#empty' => $this->t('No individual files found for this example.'),
+  '#empty' => $this->t('No individual files found for this example.'),
   '#attributes' => ['style' => 'width: 100%;'],
 ];
 
@@ -298,10 +288,6 @@ $table = [
     
     return $response;
   }
-// public function ajax_example_changed_callback(array &$form, FormStateInterface $form_state) {
-//     // Return the wrapper containing both the example download link and the files table.
-//     return $form['example_details_wrapper'];
-//   }
   
   public function ajax_example_changed_callback(array &$form, FormStateInterface $form_state) {
     // ✅ UPDATED: Return the new wrapper containing just the example download link.
@@ -335,68 +321,68 @@ $table = [
   }
 
   
-  public function ajax_example_files_callback($example_id) {
-    if (!$example_id) {
-        return ['#markup' => ''];
-    }
+  // public function ajax_example_files_callback($example_id) {
+  //   if (!$example_id) {
+  //       return ['#markup' => ''];
+  //   }
 
-    $connection = \Drupal::database();
-    // Assuming the table name is 'textbook_companion_example_file'
-    $query = $connection->select('textbook_companion_example_file', 'tcef');
-    $query->fields('tcef', ['id', 'filename', 'filetype']);
-    $query->condition('example_id', $example_id);
-    $query->orderBy('filename', 'ASC');
-    $results = $query->execute()->fetchAll();
+  //   $connection = \Drupal::database();
+  //   // Assuming the table name is 'textbook_companion_example_file'
+  //   $query = $connection->select('textbook_companion_example_file', 'tcef');
+  //   $query->fields('tcef', ['id', 'filename', 'filetype']);
+  //   $query->condition('example_id', $example_id);
+  //   $query->orderBy('filename', 'ASC');
+  //   $results = $query->execute()->fetchAll();
 
-    if (empty($results)) {
-        return ['#markup' => ''];
-    }
+  //   if (empty($results)) {
+  //       return ['#markup' => ''];
+  //   }
 
-    $header = [
-        'filename' => $this->t('Filename'),
-        'filetype' => $this->t('Type'),
-    ];
+  //   $header = [
+  //       'filename' => $this->t('Filename'),
+  //       'filetype' => $this->t('Type'),
+  //   ];
 
-    $rows = [];
-    foreach ($results as $file) {
-        $example_file_type = $this->t('Unknown');
-        switch ($file->filetype) {
-            case 'S':
-                $example_file_type = $this->t('Source or Main file');
-                break;
-            case 'R':
-                $example_file_type = $this->t('Result file');
-                break;
-            case 'X':
-                $example_file_type = $this->t('xcos file');
-                break;
-        }
+  //   $rows = [];
+  //   foreach ($results as $file) {
+  //       $example_file_type = $this->t('Unknown');
+  //       switch ($file->filetype) {
+  //           case 'S':
+  //               $example_file_type = $this->t('Source or Main file');
+  //               break;
+  //           case 'R':
+  //               $example_file_type = $this->t('Result file');
+  //               break;
+  //           case 'X':
+  //               $example_file_type = $this->t('xcos file');
+  //               break;
+  //       }
 
-        // Create the linked filename. Adjust the route name if necessary.
-        $link = Link::fromTextAndUrl(
-            $file->filename,
-            Url::fromRoute('textbook_companion.download_file', ['file_id' => $file->id])
-        )->toString();
+  //       // Create the linked filename. Adjust the route name if necessary.
+  //       $link = Link::fromTextAndUrl(
+  //           $file->filename,
+  //           Url::fromRoute('textbook_companion.download_file', ['file_id' => $file->id])
+  //       )->toString();
         
-        $rows[] = [
-            // Ensure rows are simple arrays or use the 'data' structure
-            // as necessary for your specific Drupal theme.
-            // Using a simple array for row data is often sufficient.
-            ['#markup' => $link],
-            ['#markup' => $example_file_type],
-        ];
-    }
+  //       $rows[] = [
+  //           // Ensure rows are simple arrays or use the 'data' structure
+  //           // as necessary for your specific Drupal theme.
+  //           // Using a simple array for row data is often sufficient.
+  //           ['#markup' => $link],
+  //           ['#markup' => $example_file_type],
+  //       ];
+  //   }
 
-    return [
-        '#type' => 'table',
-        // ✅ REMOVED: Remove the '#caption' element to match the image.
-        '#header' => $header,
-        '#rows' => $rows,
-        // ✅ UPDATED: Add a custom class for styling the table header.
-        '#attributes' => ['class' => ['textbook-companion-files', 'textbook-companion-example-file-list']],
-        '#empty' => $this->t('No files found for this example.'),
-    ];
-  }
+  //   return [
+  //       '#type' => 'table',
+  //       // ✅ REMOVED: Remove the '#caption' element to match the image.
+  //       '#header' => $header,
+  //       '#rows' => $rows,
+  //       // ✅ UPDATED: Add a custom class for styling the table header.
+  //       '#attributes' => ['class' => ['textbook-companion-files', 'textbook-companion-example-file-list']],
+  //       '#empty' => $this->t('No files found for this example.'),
+  //   ];
+  // }
   public function _html_book_info($preference_id) {
     $connection = \Drupal::database();
 
