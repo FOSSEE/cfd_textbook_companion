@@ -8,6 +8,7 @@ use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
+use Drupal\Core\Render\Markup;
 
 class TextbookCompanionRunForm extends FormBase {
 
@@ -104,35 +105,6 @@ class TextbookCompanionRunForm extends FormBase {
 
     
     
-    //    $selected_example = $form_state->getValue('examples') ?? 0;
-
-    // // This wrapper contains everything that depends on the selected chapter.
-    // $form['example_wrapper'] = [
-    //   '#type' => 'container',
-    //   '#attributes' => ['id' => 'example-wrapper'],
-    // ];
-
-    // $form['example_wrapper']['examples'] = [
-    //   '#type' => 'select',
-    //   '#title' => $this->t('Example No. (Caption):'),
-    //   '#options' => $this->_list_of_examples($chapter_id),
-    //   '#ajax' => [
-    //     'callback' => '::ajax_example_changed_callback',
-    //     // ✅ UPDATED: Point to the new, more specific wrapper for the example link.
-    //     'wrapper' => 'download-example-link-wrapper',
-    //   ],
-    //   '#states' => ['invisible' => [':input[name="chapter"]' => ['value' => 0]]],
-    // ];
-
-
-    //   $form['download_example_wrapper']['download_example'] = [
-    //     '#type' => 'markup',
-    //     '#markup' => Link::fromTextAndUrl(
-    //       $this->t('Download Example (OpenFOAM code)'),
-    //       Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
-    //     )->toString(),
-    //   ];
-    // Example Wrapper - Depends on chapter selection
 $form['book_wrapper']['chapter_download']['example_wrapper'] = [
   '#type' => 'container',
   '#attributes' => ['id' => 'example-wrapper'],
@@ -165,6 +137,73 @@ $form['book_wrapper']['chapter_download']['example_wrapper'] = [
     ];
   
 
+// For table and example files
+ $query = \Drupal::database()->select('textbook_companion_example_files');
+        $query->fields('textbook_companion_example_files');
+        $query->condition('example_id', $example_list_default_value);
+        $example_list_q = $query->execute();
+        if ($example_list_q)
+          {
+            $example_files_rows = [];
+            while ($example_list_data = $example_list_q->fetchObject())
+              {
+                $example_file_type = '';
+                switch ($example_list_data->filetype)
+                {
+                    case 'S':
+                        $example_file_type = 'Source or Main file';
+                        break;
+                    case 'R':
+                        $example_file_type = 'Result file';
+                        break;
+                    case 'X':
+                        $example_file_type = 'xcos file';
+                        break;
+                    default:
+                        $example_file_type = 'Unknown';
+                        break;
+                }
+
+                $items=[
+Link::fromTextAndUrl(
+            $file->filename,
+            Url::fromRoute('textbook_companion.download_file', ['file_id' => $file->id])
+        )->toString(),
+                ];
+               
+              }
+
+              array_push($example_files_rows,$items);
+              $form['download_example_wrapper']['example_files'] =[
+                '#type' =>'fieldset',
+                '#title' => t('List of example files'),
+              ];
+
+              $example_files_header = ['Filename','Type'];
+            /* creating list of files table */
+            $example_files_header = [
+               'Filename',
+                'Type'
+            ];
+               
+            
+            $table = [
+              '#type' => 'table',
+               '#header' => $example_files_header,
+                '#rows' => $example_files_rows,
+              '#attributes' => [
+          'style' => 'width: 100%;',
+              ],
+          
+            ];
+          }
+            
+       
+ 
+$form['download_example_wrapper']['example_files']['table'] = $table;
+      
+
+    
 
    
 
@@ -182,6 +221,8 @@ $form['book_wrapper']['chapter_download']['example_wrapper'] = [
     return $form['book_wrapper']['chapter_download'];
   }
 public function ajax_example_changed_callback(array &$form, FormStateInterface $form_state) {
+  
+
   return $form['book_wrapper']['chapter_download']['example_wrapper']['download_example_wrapper'];
 }
 
