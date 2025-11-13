@@ -37,9 +37,6 @@ class TextbookCompanionRunForm extends FormBase {
    // $selected_chapter = (int) $form_state->getValue('chapter');
     //$selected_example = (int) $form_state->getValue('example');
 
-
-    // var_dump($url_book_pref_id);die;
-    // var_dump($selected_book);die;
     // BOOK select (top-level)
     $form['book'] = [
       '#type' => 'select',
@@ -74,6 +71,7 @@ class TextbookCompanionRunForm extends FormBase {
           Url::fromRoute('textbook_companion.download_book', ['book_id' => $selected_book])
         )->toString(),
       ];
+
 $selected_chapter = (int) $form_state->getValue('chapter');
 
       // Chapter select
@@ -106,108 +104,131 @@ $selected_chapter = (int) $form_state->getValue('chapter');
       }
       
     }
+// $selected_example = (int) ($form_state->getValue('examples') );
 
-    // var_dump($selected_chapter);die;
+//     $form['chapter_download']['examples'] = [
+//     '#type' => 'select',
+//     '#title' => $this->t('Name of the example'),
+//     '#options' => $this->_list_of_examples($selected_chapter),
+//     // '#default_value' => $selected_example,
+//     '#ajax' => [
+//       'callback' => '::ajax_example_changed_callback',
+//       'wrapper' => 'download-example-link-wrapper',
+//     ],
+//   ];
 
-    $selected_example = (int)$form_state->getValue('examples') ?? 0;
+  
+$form['chapter_download']['examples'] = [
+  '#type' => 'select',
+  '#title' => $this->t('Name of the example'),
+  '#options' => $this->_list_of_examples($selected_chapter),
+  '#default_value' => $form_state->getValue('examples') ?? 0,
+  '#ajax' => [
+    'callback' => '::ajax_example_changed_callback',
+    'wrapper' => 'download-example-link-wrapper',
+  ],
+];
 
-            //  var_dump($selected_example);die;
- 
-      //  if ($selected_chapter) {
+$selected_example = (int) ($form_state->getValue('examples') );
 
-  // Example dropdown
-  $form['chapter_download']['examples'] = [
-    '#type' => 'select',
-    '#title' => $this->t('Name of the example'),
-    '#options' => $this->_list_of_examples($selected_chapter, $selected_example),
-    '#default_value' => $selected_example,
-    '#ajax' => [
-      'callback' => '::ajax_example_changed_callback',
-      'wrapper' => 'download-example-link-wrapper',
-      //  'event' => 'change',
-    ],
-  ];
-
-
-  // Download example + files wrapper
+  // Wrapper for download example link
   $form['download_example_wrapper'] = [
     '#type' => 'container',
     '#attributes' => ['id' => 'download-example-link-wrapper'],
   ];
-       
-  // if ($selected_example) {
 
-    // Download link
     $form['download_example_wrapper']['download_example'] = [
       '#type' => 'markup',
       '#markup' => Link::fromTextAndUrl(
         $this->t('Download Example (OpenFOAM code)'),
-        Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
+        Url::fromUri('internal:/textbook-companion/download/example/' .($selected_example))
       )->toString(),
     ];
-  // }
-  //  For table and example files
-//   $query = \Drupal::database()->select('textbook_companion_example_files');
-//             $query->fields('textbook_companion_example_files');
-//             $query->condition('example_id', $selected_example);
-//             $example_list_q = $query->execute();
-  
-//   if($example_list_q)
-//     {
 
-//     $example_files_rows = [];
-//     while($example_list_data = $example_list_q->fetchObject())
-//     {
+//     $form['download_example_wrapper']['download_example'] = [
+//   '#type' => 'markup',
+//   '#markup' => Link::fromTextAndUrl(
+//     $this->t('Download Example (OpenFOAM code)'),
+//     Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
+//   )->toString(),
+// ];
 
-//       $example_files_type = '';
-//       switch ($example_list_data->filetype)
-//       {
-//         case 'S':
-//           $example_file_type = 'Source or Main file';
-//           break;
-//         case 'R':
-//             $example_file_type = 'Result file';
-//             break;
-//         case 'X':
-//           $example_file_type = 'xcos file';
-//           break;
-//         default:
-//         $example_file_type = 'unknown';
-//         break;    
-
-//       }
-//       $items =[
-//         Link::fromTextandUrl($example_list_data->filename,Url::fromRoute('textbook_companion.download_Example_file', ['file_id' => $example_list_data->id]))->toString(),
-//         "{$example_file_type}"
-
-//       ];
-//     }
-
-//     array_push($example_files_rows,$items);
-//     $form['download_example_wrapper']['example_files']=
-//     [
-//       '#type' =>'fieldset',
-//       '#title' => t('List of example files'),
+//   if ($selected_example > 0) {
+//   $form['download_example_wrapper']['example_details'] = [
+//       '#type' => 'markup',
+//       '#markup' => $this->t('Example no. @example', ['@example' => $form_state->getValue('examples')]),
 //     ];
+// } else {
+//   $form['download_example_wrapper']['example_details'] = [
+//     '#type' => 'markup',
+//     '#markup' => $this->t('Please select an example.'),
+//   ];
+// }
 
-//     $example_files_header = [
-//       'Filename',
-//       'Type'
-//     ];
+// For table and example files
+ $query = \Drupal::database()->select('textbook_companion_example_files');
+        $query->fields('textbook_companion_example_files');
+        $query->condition('example_id', $form_state->getValue('examples'));
+        $example_list_q = $query->execute();
+        if ($example_list_q)
+          {
+            $example_files_rows = [];
+            while ($example_list_data = $example_list_q->fetchObject())
+              {
+                $example_file_type = '';
+                switch ($example_list_data->filetype)
+                {
+                    case 'S':
+                        $example_file_type = 'Source or Main file';
+                        break;
+                    case 'R':
+                        $example_file_type = 'Result file';
+                        break;
+                    case 'X':
+                        $example_file_type = 'xcos file';
+                        break;
+                    default:
+                        $example_file_type = 'Unknown';
+                        break;
+                }
 
-//     $table = [
-//       '#type' =>'table',
-//       '#header' => $example_files_header,
-//       '#rows' =>$example_files_rows,
-//       '#attributes' =>[
-//         'style' => 'width: 100%;',
-//       ],
-//     ];
-//   }
+                $items=[
+                  Link::fromTextAndUrl($example_list_data->filename,Url::fromRoute('textbook_companion.download_example_file', ['file_id' => $example_list_data->id]))->toString(),
+                  "{$example_file_type}"
+                ];
+               
+              }
 
-// $form['download_example_wrapper']['example_files']['table'] = $table;
+              array_push($example_files_rows,$items);
+              $form['download_example_wrapper']['example_files'] =[
+                '#type' =>'fieldset',
+                '#title' => t('List of example files'),
+              ];
+
+              //$example_files_header = ['Filename','Type'];
+            /* creating list of files table */
+            $example_files_header = [
+               'Filename',
+                'Type'
+            ];
+               
+            
+            $table = [
+              '#type' => 'table',
+               '#header' => $example_files_header,
+                '#rows' => $example_files_rows,
+              '#attributes' => [
+          'style' => 'width: 100%;',
+              ],
+          
+            ];
+          }
+            
+       
+ 
+$form['download_example_wrapper']['example_files']['table'] = $table;
       
-        // }
+
     
 
    
@@ -226,18 +247,22 @@ $selected_chapter = (int) $form_state->getValue('chapter');
     return $form['chapter_download'];
   }
 public function ajax_example_changed_callback(array &$form, FormStateInterface $form_state) {
-  // $selected_example = (int) $form_state->getValue('examples') ?? 0;
-  // $selected_chapter = (int) $form_state->getValue('chapter') ?? 0;
-  // $form_state->setRebuild(TRUE);
+//   $selected_example = (int) $form_state->getValue('examples') ?? 0;
+//   $selected_chapter = (int) $form_state->getValue('chapter') ?? 0;
+// //  $form_state->setRebuild(TRUE);
 
-//   // Rebuild the examples select field with the correct options
-  //  $form['examples']['#options'] = $this->_list_of_examples($selected_chapter, $selected_example);
+// //   // Rebuild the examples select field with the correct options
+//   $form['examples']['#options'] = $this->_list_of_examples($selected_chapter, $selected_example);
 
 //   // Return the updated download example wrapper
 
   return $form['download_example_wrapper'];
-  // return $form['download_example_wrapper'];
 }
+
+// public function ajax_example_changed_callback(array &$form, FormStateInterface $form_state) {
+//   $form_state->setRebuild(TRUE);
+//   return $form['download_example_wrapper'];
+// }
 
   //  ---------------------------
   // HELPER FUNCTIONS
@@ -390,7 +415,7 @@ public function ajax_example_changed_callback(array &$form, FormStateInterface $
     return $book_chapters;
   }
 
-  public function _list_of_examples($chapter_id = 0, $selected_example = 0) {
+  public function _list_of_examples($chapter_id = 0, $example_id = 0) {
   $examples = [0 => $this->t('Please select...')];
   if (!$chapter_id) {
     return $examples;
