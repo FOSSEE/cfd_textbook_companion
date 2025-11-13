@@ -1,0 +1,20 @@
+textbook_companion.settings:
+  type: mapping
+  label: Settings
+  mapping:
+    textbook_companion_dependency_extensions:
+      type: string
+    textbook_companion_from_email:
+      type: 'NULL'
+    textbook_companion_emails:
+      type: string
+    textbook_companion_source_extensions:
+      type: string
+    textbook_companion_result_extensions:
+      type: string
+    textbook_companion_xcos_extensions:
+      type: string
+    textbook_companion_cc_emails:
+      type: string
+    textbook_companion_book_preferences:
+      type: string
