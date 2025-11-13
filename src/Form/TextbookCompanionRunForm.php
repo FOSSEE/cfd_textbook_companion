@@ -157,16 +157,67 @@ if (!empty($selected_example)) {
 //   '@count' => count($result),
 // ]);
 // ✅ Example files table rendering
+// if (!empty($selected_example)) {
+//   $query = \Drupal::database()->select('textbook_companion_example_files', 'f');
+//   $query->fields('f');
+//   $query->condition('example_id', $selected_example);
+//   $files = $query->execute()->fetchAll();
+
+//   // If there are results
+//   if (!empty($files)) {
+//     $rows = [];
+//     foreach ($files as $file) {
+//       switch ($file->filetype) {
+//         case 'S': $type = 'Source or Main file'; break;
+//         case 'R': $type = 'Result file'; break;
+//         case 'X': $type = 'xcos file'; break;
+//         default:  $type = 'Unknown'; break;
+//       }
+
+// $example_files_rows[] = [
+//   Link::fromTextAndUrl(
+//     $file->filename,
+//     Url::fromUserInput('/textbook-companion/download/file/' . $files->id)
+//   )->toString(),
+//   $type,
+
+// ];
+
+    
+//     }
+
+//     // ✅ Wrap table in container
+//     $form['download_example_wrapper']['example_files'] = [
+//       '#type' => 'fieldset',
+//       '#title' => $this->t('List of Example Files'),
+//       '#attributes' => ['id' => 'ajax-download-example-files-replace'],
+//       'table' => [
+//         '#type' => 'table',
+//         '#header' => [$this->t('Filename'), $this->t('Type')],
+//         '#rows' => $rows,
+//               '#attributes' =>[
+//         'style' => 'width: 100%;',
+//       ],
+
+//         '#empty' => $this->t('No files found for this example.'),
+//       ],
+//     ];
+//   }
+// }
+
+
+
 if (!empty($selected_example)) {
   $query = \Drupal::database()->select('textbook_companion_example_files', 'f');
   $query->fields('f');
   $query->condition('example_id', $selected_example);
   $files = $query->execute()->fetchAll();
 
-  // If there are results
   if (!empty($files)) {
     $rows = [];
+
     foreach ($files as $file) {
+      // Map file type to label
       switch ($file->filetype) {
         case 'S': $type = 'Source or Main file'; break;
         case 'R': $type = 'Result file'; break;
@@ -174,31 +225,23 @@ if (!empty($selected_example)) {
         default:  $type = 'Unknown'; break;
       }
 
-      // ✅ Make sure this matches your database column name
-      // $link = Link::fromTextAndUrl(
-      //   $file->filename,
-      //   Url::fromRoute('textbook_companion.download_file', ['file_id' => $example_id])
-      // )->toRenderable();
+      // Ensure you have correct ID field name in your table
+      $file_id = $file->id ?? $file->example_file_id ?? NULL;
 
-    //   $rows[] = [
-    //     'filename' => $link,
-    //     'type' => ['#markup' => $type],
-    //   ];
-    // Build download link for each file (make sure your route name & param match)
-      // $link = Link::fromTextAndUrl(
-      //   $file->filename,
-      //   Url::fromRoute('textbook_companion.download_example_file', ['file_id' => $file->id])
-      // )->toRenderable();
+      // Create link to download file
+      $link = Link::fromTextAndUrl(
+        $file->filename,
+        Url::fromUserInput('/textbook-companion/download/file/' . $file_id)
+      )->toRenderable();
 
-      // // Add to rows
-      // $rows[] = [
-      //   'filename' => ['data' => $link],
-      //   'type' => ['data' => ['#markup' => $type]],
-      // ];
-    
+      // Add row to the table
+      $rows[] = [
+        'filename' => ['data' => $link],
+        'type' => ['data' => ['#markup' => $type]],
+      ];
     }
 
-    // ✅ Wrap table in container
+    // Wrap table in container
     $form['download_example_wrapper']['example_files'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('List of Example Files'),
@@ -207,83 +250,13 @@ if (!empty($selected_example)) {
         '#type' => 'table',
         '#header' => [$this->t('Filename'), $this->t('Type')],
         '#rows' => $rows,
-              '#attributes' =>[
-        'style' => 'width: 100%;',
-      ],
-
         '#empty' => $this->t('No files found for this example.'),
+        '#attributes' => ['style' => 'width: 100%;'],
       ],
     ];
   }
 }
 
-
-  //  For table and example files
-//   $query = \Drupal::database()->select('textbook_companion_example_files');
-//             $query->fields('textbook_companion_example_files');
-//             $query->condition('example_id', $selected_example);
-//             $example_list_q = $query->execute();
-
-// //   $query = \Drupal::database()->select('textbook_companion_example_files', 't');
-// // $query->fields('t');
-// // $query->condition('example_id', $selected_example);
-// // $example_list_q = $query->execute();
-//             // var_dump($example_list_data->example_id);die;
-  
-//   if($example_list_q)
-//     {
-
-//     $example_files_rows = [];
-//     while($example_list_data = $example_list_q->fetchObject())
-//     {
-
-//       $example_file_type = '';
-//       switch ($example_list_data->filetype)
-//       {
-//         case 'S':
-//           $example_file_type = 'Source or Main file';
-//           break;
-//         case 'R':
-//             $example_file_type = 'Result file';
-//             break;
-//         case 'X':
-//           $example_file_type = 'Xcos file';
-//           break;
-//         default:
-//         $example_file_type = 'Unknown';
-//         break;    
-
-//       }
-//       $items =[
-//         Link::fromTextandUrl($example_list_data->filename,Url::fromRoute('textbook_companion.download_example_file', ['file_id' => $example_file_id]))->toString(),
-//         $example_file_type
-
-//       ];
-//     }
-
-//     // array_push($example_files_rows,$items);
-//     $form['download_example_wrapper']['example_files']=
-//     [
-//       '#type' =>'fieldset',
-//       '#title' => t('List of example files'),
-//     ];
-
-//     $example_files_header = [
-//       'Filename',
-//       'Type'
-//     ];
-
-//     $table = [
-//       '#type' =>'table',
-//       '#header' => $example_files_header,
-//       '#rows' =>$example_files_rows,
-//       '#attributes' =>[
-//         'style' => 'width: 100%;',
-//       ],
-//     ];
-//   }
-
-// $form['download_example_wrapper']['example_files']['table'] = $table;
       
 
        }    return $form;
