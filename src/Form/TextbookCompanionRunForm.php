@@ -124,7 +124,7 @@ $selected_chapter = (int) $form_state->getValue('chapter');
     '#ajax' => [
       'callback' => '::ajax_example_changed_callback',
       'wrapper' => 'download-example-link-wrapper',
-      //  'event' => 'change',
+       'event' => 'change',
     ],
   ];
 
@@ -136,7 +136,7 @@ $selected_chapter = (int) $form_state->getValue('chapter');
   ];
        
   // if ($selected_example) {
-
+if (!empty($selected_example)) {
     // Download link
     $form['download_example_wrapper']['download_example'] = [
       '#type' => 'markup',
@@ -145,74 +145,88 @@ $selected_chapter = (int) $form_state->getValue('chapter');
         Url::fromRoute('textbook_companion.download_example', ['example_id' => $selected_example])
       )->toString(),
     ];
-  // }
-  //  For table and example files
-//   $query = \Drupal::database()->select('textbook_companion_example_files');
-//             $query->fields('textbook_companion_example_files');
-//             $query->condition('example_id', $selected_example);
-//             $example_list_q = $query->execute();
   
-//   if($example_list_q)
-//     {
+  
+// $query = \Drupal::database()->select('textbook_companion_example_files', 'f');
+// $query->fields('f');
+// $query->condition('example_id', $selected_example);
+// $result = $query->execute()->fetchAll();
 
-//     $example_files_rows = [];
-//     while($example_list_data = $example_list_q->fetchObject())
-//     {
+// \Drupal::logger('tbc_debug')->notice('Example ID: @id, Found @count files', [
+//   '@id' => $selected_example,
+//   '@count' => count($result),
+// ]);
 
-//       $example_files_type = '';
-//       switch ($example_list_data->filetype)
-//       {
-//         case 'S':
-//           $example_file_type = 'Source or Main file';
-//           break;
-//         case 'R':
-//             $example_file_type = 'Result file';
-//             break;
-//         case 'X':
-//           $example_file_type = 'xcos file';
-//           break;
-//         default:
-//         $example_file_type = 'unknown';
-//         break;    
 
-//       }
-//       $items =[
-//         Link::fromTextandUrl($example_list_data->filename,Url::fromRoute('textbook_companion.download_Example_file', ['file_id' => $example_list_data->id]))->toString(),
-//         "{$example_file_type}"
+  //  For table and example files
+  $query = \Drupal::database()->select('textbook_companion_example_files');
+            $query->fields('textbook_companion_example_files');
+            $query->condition('example_id', $selected_example);
+            $example_list_q = $query->execute();
 
-//       ];
-//     }
+//   $query = \Drupal::database()->select('textbook_companion_example_files', 't');
+// $query->fields('t');
+// $query->condition('example_id', $selected_example);
+// $example_list_q = $query->execute();
+            // var_dump($example_list_data->example_id);die;
+  
+  if($example_list_q)
+    {
 
-//     array_push($example_files_rows,$items);
-//     $form['download_example_wrapper']['example_files']=
-//     [
-//       '#type' =>'fieldset',
-//       '#title' => t('List of example files'),
-//     ];
+    $example_files_rows = [];
+    while($example_list_data = $example_list_q->fetchObject())
+    {
 
-//     $example_files_header = [
-//       'Filename',
-//       'Type'
-//     ];
+      $example_file_type = '';
+      switch ($example_list_data->filetype)
+      {
+        case 'S':
+          $example_file_type = 'Source or Main file';
+          break;
+        case 'R':
+            $example_file_type = 'Result file';
+            break;
+        case 'X':
+          $example_file_type = 'Xcos file';
+          break;
+        default:
+        $example_file_type = 'Unknown';
+        break;    
 
-//     $table = [
-//       '#type' =>'table',
-//       '#header' => $example_files_header,
-//       '#rows' =>$example_files_rows,
-//       '#attributes' =>[
-//         'style' => 'width: 100%;',
-//       ],
-//     ];
-//   }
+      }
+      $items =[
+        Link::fromTextandUrl($example_list_data->filename,Url::fromRoute('textbook_companion.download_example_file', ['file_id' => $example_file_id]))->toString(),
+        $example_file_type
 
-// $form['download_example_wrapper']['example_files']['table'] = $table;
+      ];
+    }
+
+    // array_push($example_files_rows,$items);
+    $form['download_example_wrapper']['example_files']=
+    [
+      '#type' =>'fieldset',
+      '#title' => t('List of example files'),
+    ];
+
+    $example_files_header = [
+      'Filename',
+      'Type'
+    ];
+
+    $table = [
+      '#type' =>'table',
+      '#header' => $example_files_header,
+      '#rows' =>$example_files_rows,
+      '#attributes' =>[
+        'style' => 'width: 100%;',
+      ],
+    ];
+  }
+
+$form['download_example_wrapper']['example_files']['table'] = $table;
       
-        // }
-    
 
-   
-
-    return $form;
+       }    return $form;
   }
   // ---------------------------
   // AJAX CALLBACKS
