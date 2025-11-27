@@ -67,6 +67,7 @@ contact_details:
 'download books to review':
   title: 'download books to review'
   description: 'Download books to review.'
-  textbook companion download code:
+'textbook companion download code':
   title: 'Download Textbook Companion Code'
+  description: 'Download code.'
 
