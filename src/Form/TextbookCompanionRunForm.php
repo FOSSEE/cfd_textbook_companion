@@ -147,63 +147,6 @@ if (!empty($selected_example)) {
     ];
   
   
-// $query = \Drupal::database()->select('textbook_companion_example_files', 'f');
-// $query->fields('f');
-// $query->condition('example_id', $selected_example);
-// $result = $query->execute()->fetchAll();
-
-// \Drupal::logger('tbc_debug')->notice('Example ID: @id, Found @count files', [
-//   '@id' => $selected_example,
-//   '@count' => count($result),
-// ]);
-// ✅ Example files table rendering
-// if (!empty($selected_example)) {
-//   $query = \Drupal::database()->select('textbook_companion_example_files', 'f');
-//   $query->fields('f');
-//   $query->condition('example_id', $selected_example);
-//   $files = $query->execute()->fetchAll();
-
-//   // If there are results
-//   if (!empty($files)) {
-//     $rows = [];
-//     foreach ($files as $file) {
-//       switch ($file->filetype) {
-//         case 'S': $type = 'Source or Main file'; break;
-//         case 'R': $type = 'Result file'; break;
-//         case 'X': $type = 'xcos file'; break;
-//         default:  $type = 'Unknown'; break;
-//       }
-
-// $example_files_rows[] = [
-//   Link::fromTextAndUrl(
-//     $file->filename,
-//     Url::fromUserInput('/textbook-companion/download/file/' . $files->id)
-//   )->toString(),
-//   $type,
-
-// ];
-
-    
-//     }
-
-//     // ✅ Wrap table in container
-//     $form['download_example_wrapper']['example_files'] = [
-//       '#type' => 'fieldset',
-//       '#title' => $this->t('List of Example Files'),
-//       '#attributes' => ['id' => 'ajax-download-example-files-replace'],
-//       'table' => [
-//         '#type' => 'table',
-//         '#header' => [$this->t('Filename'), $this->t('Type')],
-//         '#rows' => $rows,
-//               '#attributes' =>[
-//         'style' => 'width: 100%;',
-//       ],
-
-//         '#empty' => $this->t('No files found for this example.'),
-//       ],
-//     ];
-//   }
-// }
 
 
 

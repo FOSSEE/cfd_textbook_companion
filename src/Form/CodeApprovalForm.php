@@ -194,28 +194,28 @@ class CodeApprovalForm extends FormBase {
         if ($ex_data['approved'] == "1") {
           if (delete_example($ex_data['example_id'])) {
             /* sending email */
-            $email_to = $user_data->mail;
-            $from = variable_get('textbook_companion_from_email', '');
-            $bcc = variable_get('textbook_companion_emails', '');
-            $cc = variable_get('textbook_companion_cc_emails', '');
-            $param['example_disapproved']['preference_id'] = $chapter_data->preference_id;
-            $param['example_disapproved']['chapter_id'] = $example_data->chapter_id;
-            $param['example_disapproved']['example_number'] = $example_data->number;
-            $param['example_disapproved']['example_caption'] = $example_data->caption;
-            $param['example_disapproved']['user_id'] = $user_data->uid;
-            $param['example_disapproved']['message'] = $ex_data['message'];
-            $param['example_disapproved']['headers'] = [
-              'From' => $from,
-              'MIME-Version' => '1.0',
-              'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
-              'Content-Transfer-Encoding' => '8Bit',
-              'X-Mailer' => 'Drupal',
-              'Cc' => $cc,
-              'Bcc' => $bcc,
-            ];
-            if (!drupal_mail('textbook_companion', 'example_disapproved', $email_to, language_default(), $param, $from, TRUE)) {
-              drupal_set_message('Error sending email message.', 'error');
-            }
+            // $email_to = $user_data->mail;
+            // $from = variable_get('textbook_companion_from_email', '');
+            // $bcc = variable_get('textbook_companion_emails', '');
+            // $cc = variable_get('textbook_companion_cc_emails', '');
+            // $param['example_disapproved']['preference_id'] = $chapter_data->preference_id;
+            // $param['example_disapproved']['chapter_id'] = $example_data->chapter_id;
+            // $param['example_disapproved']['example_number'] = $example_data->number;
+            // $param['example_disapproved']['example_caption'] = $example_data->caption;
+            // $param['example_disapproved']['user_id'] = $user_data->uid;
+            // $param['example_disapproved']['message'] = $ex_data['message'];
+            // $param['example_disapproved']['headers'] = [
+            //   'From' => $from,
+            //   'MIME-Version' => '1.0',
+            //   'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+            //   'Content-Transfer-Encoding' => '8Bit',
+            //   'X-Mailer' => 'Drupal',
+            //   'Cc' => $cc,
+            //   'Bcc' => $bcc,
+            // ];
+            // if (!drupal_mail('textbook_companion', 'example_disapproved', $email_to, language_default(), $param, $from, TRUE)) {
+            //   drupal_set_message('Error sending email message.', 'error');
+            // }
           }
           else {
             drupal_set_message('Error disapproving and deleting example. Please contact administrator.', 'error');

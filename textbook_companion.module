@@ -2069,26 +2069,27 @@ function book_proposal_form_submit($form, &$form_state, $directory_name = NULL)
     }
     /*******************************************************/
     /* sending email */
-    $email_to = $user->mail;
-    $from = \Drupal::config('textbook_companion.settings')->get('textbook_companion_from_email');
-    $bcc = \Drupal::config('textbook_companion.settings')->get('textbook_companion_emails');
-    $cc = \Drupal::config('textbook_companion.settings')->get('textbook_companion_cc_emails');
-    $param['proposal_received']['proposal_id'] = $proposal_id;
-    $param['proposal_received']['user_id'] = $user->uid;
-    $param['proposal_received']['headers'] = array(
-        'From' => $from,
-        'MIME-Version' => '1.0',
-        'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
-        'Content-Transfer-Encoding' => '8Bit',
-        'X-Mailer' => 'Drupal',
-        'Cc' => $cc,
-        'Bcc' => $bcc
-    );
-    if (!drupal_mail('textbook_companion', 'proposal_received', $email_to, language_default(), $param, $from, TRUE))
-        \Drupal::messenger()->addError('Error sending email message.');
-    \Drupal::messenger()->addStatus(t('We have received you book proposal. We will get back to you soon.'));
-    //drupal_goto('');
-}
+    
+//     $email_to = $user->mail;
+//     $from = \Drupal::config('textbook_companion.settings')->get('textbook_companion_from_email');
+//     // $bcc = \Drupal::config('textbook_companion.settings')->get('textbook_companion_emails');
+//     $cc = \Drupal::config('textbook_companion.settings')->get('textbook_companion_cc_emails');
+//     $param['proposal_received']['proposal_id'] = $proposal_id;
+//     $param['proposal_received']['user_id'] = $user->uid;
+//     $param['proposal_received']['headers'] = array(
+//         'From' => $from,
+//         'MIME-Version' => '1.0',
+//         'Content-Type' => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+//         'Content-Transfer-Encoding' => '8Bit',
+//         'X-Mailer' => 'Drupal',
+//         'Cc' => $cc,
+//         'Bcc' => $bcc
+//     );
+//     if (!drupal_mail('textbook_companion', 'proposal_received', $email_to, language_default(), $param, $from, TRUE))
+//         \Drupal::messenger()->addError('Error sending email message.');
+//     \Drupal::messenger()->addStatus(t('We have received you book proposal. We will get back to you soon.'));
+//     //drupal_goto('');
+// }
 /**
  * Implementation of hook_mail().
  */
@@ -2096,9 +2097,9 @@ function textbook_companion_mail($key, &$message, $params)
 {
     $user = \Drupal::currentUser();
     // $language = $message['lianguage'];
-    $tbc_bcc_emails = array(
-        'Bcc' => \Drupal::config('textbook_companion.settings')->get('textbook_companion_emails')
-    );
+    // $tbc_bcc_emails = array(
+    //     'Bcc' => \Drupal::config('textbook_companion.settings')->get('textbook_companion_emails')
+    // );
     switch ($key) {
         case 'proposal_received':
             // bcc to textbook_companion_emails
@@ -3944,4 +3945,4 @@ function _dir_name($book, $author, $pref_id)
     return $directory_name;
 }
 
-
+}

@@ -2012,15 +2012,16 @@ return $this->redirect('textbook_companion.run_form', ['book_pref_id' => $book_i
 
     $results = $query->execute()->fetchAll();
 
-    if (empty($results)) {
-        $output .= "Work has been completed on the following books under the Textbook Companion Project. 
-                    <span style='color:red;'>The list below is not the books as named but only are the solved example for CFD</span>";
-    }
-    else {
-        $output .= "Work has been completed on the following books under the Textbook Companion Project. <br>
-                    <span style='color:red;'>The list below is not the books as named but only are the solved example for CFD.</span>";
-
-        $rows = [];
+  if (empty($results)) {
+    $output .= "Work has been completed on the following books under the Textbook Companion Project.
+    <span style='color:red;'>The list below is not the books as named but only are the solved example for CFD</span>";
+  }
+  else {
+    $output .= "Work has been completed on the following books under the Textbook Companion Project. <br>
+    <span style='color:red;'>The list below is not the books as named but only are the solved example for CFD.</span>";
+  }
+ 
+      $rows = [];
         $i = count($results);
         foreach ($results as $row) {
             $completion_year = date("Y", $row->completion_date);
@@ -2053,7 +2054,7 @@ return $this->redirect('textbook_companion.run_form', ['book_pref_id' => $book_i
       '#header' => $header,
       '#rows' => $rows,
       //'#empty' => 'no rows found',
-    ];    }
+    ];    
 
     return $output;
 }

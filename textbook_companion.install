@@ -22,12 +22,12 @@ function textbook_companion_uninstall()
     // Remove tables.
     drupal_uninstall_schema('textbook_companion');
     // Remove variables
-    \Drupal::config('textbook_companion.settings')->clear('textbook_companion_emails')->save();
-    \Drupal::config('textbook_companion.settings')->clear('textbook_companion_from_email')->save();
-    \Drupal::config('textbook_companion.settings')->clear('textbook_companion_source_extensions')->save();
-    \Drupal::config('textbook_companion.settings')->clear('textbook_companion_dependency_extensions')->save();
-    \Drupal::config('textbook_companion.settings')->clear('textbook_companion_result_extensions')->save();
-    \Drupal::config('textbook_companion.settings')->clear('textbook_companion_xcos_extensions')->save();
+    // \Drupal::config('textbook_companion.settings')->clear('textbook_companion_emails')->save();
+    // \Drupal::config('textbook_companion.settings')->clear('textbook_companion_from_email')->save();
+    // \Drupal::config('textbook_companion.settings')->clear('textbook_companion_source_extensions')->save();
+    // \Drupal::config('textbook_companion.settings')->clear('textbook_companion_dependency_extensions')->save();
+    // \Drupal::config('textbook_companion.settings')->clear('textbook_companion_result_extensions')->save();
+    // \Drupal::config('textbook_companion.settings')->clear('textbook_companion_xcos_extensions')->save();
   }
 /**
  * Implementation of hook_schema().
